@@ -1,4 +1,4 @@
-from MetReg.base.base_train import Base_train_ml
+#from MetReg.base.base_train import Base_train_ml
 
 
 class train_ml():
@@ -11,6 +11,10 @@ class train_ml():
         self.X = X
         self.y = y
 
-    def __call__(self):
-        self.mdl.fit(self.X, self.y)
-        return self.mdl
+    @staticmethod
+    def _fit_grid(mdl, X, y):
+        if mdl is None:
+            raise KeyError('give a model class')
+        else:
+            mdl.fit(X, y)
+        return mdl

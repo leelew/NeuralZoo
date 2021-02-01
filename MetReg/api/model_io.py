@@ -1,9 +1,15 @@
+import os
+import pickle
+
+from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
+from MetReg.models.dl.lstm import lstm, rnn, bilstm, gru
 from MetReg.models.ml.linear import LR, ElasticNet, Lasso, Ridge
 from MetReg.models.ml.tree import DT, GBDT, RF, LightGBM, Xgboost
-from MetReg.utils.parser import get_lr_args
-
 from MetReg.train.train_ml import train_ml
-from MetReg.benchmark import _benchmark_array, _benchmark_img
+from MetReg.utils.parser import get_lr_args
+from MetReg.models.ml.svr import svr
+from MetReg.models.ml.gaussian import GP
+from MetReg.models.ml.elm import elm
 
 
 class model_generator:
@@ -19,9 +25,35 @@ class model_generator:
             mdl = self._get_lr_mdl(self.mdl_name)
         elif 'tree' in self.mdl_name.lower():
             mdl = self._get_tree_mdl(self.mdl_name)
+        elif 'rnn' in self.mdl_name.lower():
+            mdl = self._get_rnn_mdl(self.mdl_name)
+        elif 'gp' in self.mdl_name.lower():
+            mdl = self._get_gaussian_mdl(self.mdl_name)
+        elif 'svr' in self.mdl_name.lower():
+            mdl = self._get_svr_mdl(self.mdl_name)
+        elif 'elm' in self.mdl_name.lower():
+            mdl = self._get_elm_mdl(self.mdl_name)
         else:
             raise NameError('Have not support this model!')
         return mdl
+
+    def _get_elm_mdl(self, mdl_name):
+        elm_hash = {
+            'elm': elm()()
+        }
+        return elm_hash[mdl_name.split('.')[-1]]
+
+    def _get_svr_mdl(self, mdl_name):
+        svr_hash = {
+            'svr': svr()()
+        }
+        return svr_hash[mdl_name.split('.')[-1]]
+
+    def _get_gaussian_mdl(self, mdl_name):
+        gaussian_hash = {
+            'gpr': GP()()
+        }
+        return gaussian_hash[mdl_name.split('.')[-1]]
 
     def _get_lr_mdl(self, mdl_name):
         config = get_lr_args()
@@ -36,32 +68,24 @@ class model_generator:
 
     def _get_tree_mdl(self, mdl_name):
 
-        lr_hash = {
+        tree_hash = {
             'dt': DT()(),
             'rf': RF()(),
             'gbdt': GBDT()(),
             'xgboost': Xgboost()(),
             'lightgbm': LightGBM()(),
         }
-        return lr_hash[mdl_name.split('.')[-1]]
+        return tree_hash[mdl_name.split('.')[-1]]
 
+    def _get_rnn_mdl(self, mdl_name):
 
-class model_trainer:
-
-    def __init__(self,
-                 mdl,
-                 X,
-                 y=None,
-                 mdl_type='ml'):
-        self.mdl = mdl
-        self.X = X
-        self.y = y
-        self.mdl_type = mdl_type
-
-    def __call__(self):
-        if self.mdl_type == 'ml':
-            self.mdl = train_ml(self.mdl, self.X, self.y)
-        return self.mdl
+        rnn_hash = {
+            'lstm': lstm()(),
+            'rnn': rnn()(),
+            'gru': gru()(),
+            'bilstm': bilstm()(),
+        }
+        return rnn_hash[mdl_name.split('.')[-1]]
 
 
 class model_benchmarker:
@@ -80,8 +104,21 @@ class model_benchmarker:
 
 
 class model_loader:
-    pass
+    def __init__(self, save_path): pass
+
+    def __call__(self): pass
 
 
 class model_saver:
-    pass
+
+    def __init__(self, mdl, dir_save, name_save):
+        self.mdl = mdl
+        self.dir_save = dir_save
+        self.name_save = name_save
+
+    def __call__(self):
+        if not os.path.isdir(self.dir_save):
+            os.mkdir(self.dir_save)
+
+        pickle.dump(self.mdl, open(
+            self.dir_save+self.name_save, 'wb'))

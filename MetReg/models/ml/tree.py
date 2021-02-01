@@ -73,15 +73,15 @@ class DT():
         :func:`sklearn.inspection.permutation_importance` as an alternative.
     """
 
-    def __init__(self, 
-                criterion='mse',
-                splitter='best',
-                max_depth=None,
-                min_samples_split=2,
-                min_samples_leaf=1,
-                min_weight_fraction_leaf=0.0, 
-                max_features=None,
-                ):
+    def __init__(self,
+                 criterion='mse',
+                 splitter='best',
+                 max_depth=None,
+                 min_samples_split=2,
+                 min_samples_leaf=1,
+                 min_weight_fraction_leaf=0.0,
+                 max_features=None,
+                 ):
         self.criterion = criterion
         self.splitter = splitter
         self.max_depth = max_depth
@@ -89,7 +89,7 @@ class DT():
         self.min_samples_leaf = min_samples_leaf
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
-    
+
     def __call__(self):
         mdl = tree.DecisionTreeRegressor(
             criterion=self.criterion,
@@ -106,13 +106,15 @@ class DT():
 class RF(DT):
 
     def __init__(self,
-                n_estimators=100,
-                criterion='mse',
-                max_depth=None,
-                min_samples_split=2,
-                min_samples_leaf=1,
-                min_weight_fraction_leaf=0.0, 
-                max_features='auto',):
+                 n_estimators=100,
+                 criterion='mse',
+                 max_depth=None,
+                 min_samples_split=2,
+                 min_samples_leaf=1,
+                 min_weight_fraction_leaf=0.0,
+                 max_features='auto',
+                 n_jobs=-1,
+                 verbose=3):
         super().__init__(
             criterion=criterion,
             max_depth=max_depth,
@@ -122,7 +124,9 @@ class RF(DT):
             max_features=max_features,
         )
         self.n_estimators = n_estimators
-    
+        self.n_jobs = -1
+        self.verbose = 3
+
     def __call__(self):
         mdl = ensemble.RandomForestRegressor(
             criterion=self.criterion,
@@ -130,24 +134,26 @@ class RF(DT):
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
             min_weight_fraction_leaf=self.min_weight_fraction_leaf,
-            max_features=self.max_features, 
-        )        
+            max_features=self.max_features,
+            n_jobs=self.n_jobs,
+            verbose=self.verbose,
+        )
         return mdl
-    
+
 
 class GBDT(RF, DT):
 
     def __init__(self,
-                loss='ls',
-                learning_rate=0.1,
-                n_estimators=100,
-                subsample=1.0,
-                criterion='friedman_mse',
-                max_depth=3,
-                min_samples_split=2,
-                min_samples_leaf=1,
-                min_weight_fraction_leaf=0.0, 
-                max_features=None,):
+                 loss='ls',
+                 learning_rate=0.1,
+                 n_estimators=100,
+                 subsample=1.0,
+                 criterion='friedman_mse',
+                 max_depth=3,
+                 min_samples_split=2,
+                 min_samples_leaf=1,
+                 min_weight_fraction_leaf=0.0,
+                 max_features=None,):
         super().__init__(
             n_estimators=n_estimators,
             criterion=criterion,
@@ -159,8 +165,8 @@ class GBDT(RF, DT):
         )
 
         self.loss = loss
-        self.learning_rate=0.1
-        self.subsample=subsample
+        self.learning_rate = 0.1
+        self.subsample = subsample
 
     def __call__(self):
         mdl = ensemble.GradientBoostingRegressor(
@@ -180,16 +186,16 @@ class GBDT(RF, DT):
 
 class Xgboost(GBDT):
 
-    def __init__(self, 
-            n_estimators=100,
-            max_depth=None,
-            learning_rate=None,
-            tree_method=None,
-            subsample=None,
-            min_child_weight=None,
-            colsample_bytree=None,
-            eta=0.05,
-            ): 
+    def __init__(self,
+                 n_estimators=100,
+                 max_depth=None,
+                 learning_rate=None,
+                 tree_method=None,
+                 subsample=None,
+                 min_child_weight=None,
+                 colsample_bytree=None,
+                 eta=0.05,
+                 ):
         super().__init__(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -200,7 +206,7 @@ class Xgboost(GBDT):
         self.tree_method = tree_method
         self.min_child_weight = min_child_weight
         self.colsample_bytree = colsample_bytree
-        self.eta=eta
+        self.eta = eta
 
     def __call__(self):
         mdl = xgboost.XGBRegressor(
@@ -215,21 +221,22 @@ class Xgboost(GBDT):
         )
         return mdl
 
+
 class LightGBM(Xgboost):
 
     def __init__(self,
-                num_leaves=31,
-                max_depth=-1,
-                learning_rate=0.1,
-                n_estimators=100,
-                subsample=1.0,
-                min_child_samples=20,
-                min_child_weight=1e-3,
-                feature_fraction=1.0,
-                bagging_fraction=1.0,
-                reg_alpha=0.0,
-                reg_lambda=0.0,
-                ): 
+                 num_leaves=31,
+                 max_depth=-1,
+                 learning_rate=0.1,
+                 n_estimators=100,
+                 subsample=1.0,
+                 min_child_samples=20,
+                 min_child_weight=1e-3,
+                 feature_fraction=1.0,
+                 bagging_fraction=1.0,
+                 reg_alpha=0.0,
+                 reg_lambda=0.0,
+                 ):
         super().__init__(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -244,7 +251,7 @@ class LightGBM(Xgboost):
         self.bagging_fraction = bagging_fraction
         self.reg_alpha = reg_alpha
         self.reg_lambda = reg_lambda
-    
+
     def __call__(self):
         mdl = lightgbm.LGBMRegressor(
             num_leaves=self.num_leaves,
@@ -254,28 +261,29 @@ class LightGBM(Xgboost):
             min_child_samples=self.min_child_samples,
             min_child_weight=self.min_child_weight,
             feature_fraction=self.feature_fraction,
-            bagging_fraction = self.bagging_fraction,
-            reg_alpha = self.reg_alpha,
-            reg_lambda = self.reg_lambda,
+            bagging_fraction=self.bagging_fraction,
+            reg_alpha=self.reg_alpha,
+            reg_lambda=self.reg_lambda,
         )
         return mdl
+
 
 if __name__ == "__main__":
     import numpy as np
     X = np.array([[1, 2], [3, 4], [3, 2], [1, 3], [3, 4]])
     y = np.array([4, 5, 6, 7, 9])
-    
-    mdl = DT()().fit(X,y)
+
+    mdl = DT()().fit(X, y)
     print(mdl.feature_importances_)
 
-    mdl = RF()().fit(X,y)
+    mdl = RF()().fit(X, y)
     print(mdl.feature_importances_)
 
-    mdl = GBDT()().fit(X,y)
+    mdl = GBDT()().fit(X, y)
     print(mdl.feature_importances_)
 
-    mdl = Xgboost()().fit(X,y)
+    mdl = Xgboost()().fit(X, y)
     print(mdl.feature_importances_)
 
-    mdl = LightGBM()().fit(X,y)
+    mdl = LightGBM()().fit(X, y)
     print(mdl.feature_importances_)
