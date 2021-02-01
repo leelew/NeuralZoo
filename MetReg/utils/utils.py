@@ -18,11 +18,7 @@ from sklearn.metrics import (explained_variance_score, mean_absolute_error,
                              mean_squared_error, median_absolute_error,
                              r2_score)
 
-"""
-from models.ML import (Gaussian_Process_Regression, Linear_Regression,
-                       Nerual_Network_Regression, Support_Vector_Regression,
-                       Tree_Regression)
-"""
+
 
 def save2pickle(data, out_path, out_file):
     """Save to pickle file"""

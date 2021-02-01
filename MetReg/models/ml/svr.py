@@ -7,14 +7,22 @@ class svr:
     def __init__(self,
                  kernel='rbf',
                  C=0.6,
-                 gamma='scale'):
+                 gamma='scale',
+                 
+                 ):
         self.kernel = kernel
         self.C = C
         self.gamma = gamma
+        self.regressor = None
 
-    def __call__(self):
-        mdl = svm.SVR(
+
+    def fit(self, X, y):
+
+
+        self.regressor = svm.SVR(
             kernel=self.kernel,
             gamma=self.gamma,
             C=self.C)
-        return mdl
+
+        self.regressor.fit(X, y)
+        return self

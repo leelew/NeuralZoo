@@ -88,14 +88,10 @@ class Data_generator():
         # split data
         X_train, X_valid = self._split_train_valid_order(self.X)
         y_train, y_valid = self._split_train_valid_order(self.y)
-        print(X_train.shape)
-        print(y_train.shape)
 
         # generate batch data
         X_train, y_train = self._get_batch_data(X_train, y_train)
         X_valid, y_valid = self._get_batch_data(X_valid, y_valid)
-        print(X_train.shape)
-        print(y_train.shape)
 
         # package into dict
         data = dict()

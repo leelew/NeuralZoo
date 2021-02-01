@@ -50,18 +50,3 @@ if __name__ == "__main__":
 
     np.save('r2_ml_tree_lightgbm.npy', r2_world)
 
-    """
-    lon, lat = np.meshgrid(np.arange(-180, 180, 1), np.arange(90, -90, -1))
-
-    plt.figure()
-
-    m = Basemap()
-    m.drawcoastlines(linewidth=0.2)
-    x, y = m(lon, lat)
-
-    sc = m.pcolormesh(x, y, r2_world, axis=)
-
-    # plt.imshow(np.mean(avg_targ_var, axis=0))
-    # plt.colorbar()
-    plt.savefig('1.pdf')
-    """

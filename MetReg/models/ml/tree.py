@@ -163,6 +163,28 @@ class RF(DT):
                 'name': 'Random Forest'}
 
 
+class adaboost(RF):
+    def __init__(self, ):
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = ensemble.AdaBoostRegressor()
+        self.regressor.fit(X,y)
+    
+        return self
+
+
+class etr(RF):
+    
+    def __init__(self, ):
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = ensemble.ExtraTreesRegressor()
+        self.regressor.fit(X,y)
+    
+        return self 
+
 class GBDT(RF, DT):
 
     def __init__(self,

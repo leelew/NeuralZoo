@@ -2,15 +2,15 @@ import os
 import pickle
 
 from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
-from MetReg.models.dl.lstm import lstm, rnn, bilstm, gru
+from MetReg.models.dl.lstm import bilstm, gru, lstm, rnn
+from MetReg.models.ml.automl import automl
+from MetReg.models.ml.elm import elm
+from MetReg.models.ml.gaussian import GP
 from MetReg.models.ml.linear import LR, ElasticNet, Lasso, Ridge
+from MetReg.models.ml.svr import svr
 from MetReg.models.ml.tree import DT, GBDT, RF, LightGBM, Xgboost
 from MetReg.train.train_ml import train_ml
 from MetReg.utils.parser import get_lr_args
-from MetReg.models.ml.svr import svr
-from MetReg.models.ml.gaussian import GP
-from MetReg.models.ml.elm import elm
-from MetReg.models.ml.automl import automl
 
 
 class model_generator:

@@ -1,7 +1,8 @@
 
-from sklearn import linear_model
-import numpy as np
 import warnings
+
+import numpy as np
+from sklearn import linear_model
 
 warnings.filterwarnings("ignore")
 
@@ -33,16 +34,22 @@ class LR():
     """
 
     def __init__(self,
-                 config,
+                 fit_intercept=True,
+                 normalize=True,
                  **kwargs):
-        self.fit_intercept = config.fit_intercept
-        self.normalize = config.normalize
+        self.fit_intercept = fit_intercept
+        self.normalize = normalize
 
-    def __call__(self):
-        mdl = linear_model.LinearRegression(
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = linear_model.LinearRegression(
             fit_intercept=self.fit_intercept,
             normalize=self.normalize)
-        return mdl
+
+
+        self.regressor.fit(X,y)
+        return self
 
 
 class Ridge():
@@ -111,39 +118,51 @@ class Ridge():
     """
 
     def __init__(self,
-                 config,
+                 max_iter=1000,
+                 tol=1e-4,
+                 fit_intercept=True,
+                 normalize=True,
+                 alpha=1.0,
+                 solver='auto',
+                 cv=False,
+                 cv_alphas=[0.1,1.0,10.0],
+                 cv_num_folds=5,
                  **kwargs):
         # common setting
-        self.max_iter = config.max_iter
-        self.tol = config.tol
-        self.fit_intercept = config.fit_intercept,
-        self.normalize = config.normalize
+        self.max_iter = max_iter
+        self.tol = tol
+        self.fit_intercept = fit_intercept
+        self.normalize = normalize
 
         # default setting
-        self.alpha = config.alpha_ridge
-        self.solver = config.solver
+        self.alpha = alpha
+        self.solver = solver
 
         # cross-validation setting
-        self.cv = config.cv_ridge
-        self.cv_alphas = config.cv_alphas
-        self.cv_num_folds = config.cv_num_folds
+        self.cv = cv
+        self.cv_alphas = cv_alphas
+        self.cv_num_folds = cv_num_folds
 
-    def __call__(self):
+        self.regressor = None
+
+    def fit(self, X, y):
         if self.cv:
-            mdl = linear_model.RidgeCV(
+            self.regressor = linear_model.RidgeCV(
                 alphas=self.cv_alphas,
                 cv=self.cv_num_folds,
                 fit_intercept=self.fit_intercept,
                 normalize=self.normalize,)
         else:
-            mdl = linear_model.Ridge(
+            self.regressor = linear_model.Ridge(
                 alpha=self.alpha,
                 fit_intercept=self.fit_intercept,
                 normalize=self.normalize,
                 max_iter=self.max_iter,
                 tol=self.tol,
                 solver=self.solver)
-        return mdl
+
+        self.regressor.fit(X,y)
+        return self
 
 
 class Lasso():
@@ -159,24 +178,31 @@ class Lasso():
     """
 
     def __init__(self,
-                 config,
+                 max_iter=1000,
+                 tol=1e-4,
+                 fit_intercept=True,
+                 normalize=True,
+                 alpha=0.01,
+                 cv=False,
+                 cv_num_folds=5,
                  **kwargs):
         # common setting
-        self.max_iter = config.max_iter
-        self.tol = config.tol
-        self.fit_intercept = config.fit_intercept,
-        self.normalize = config.normalize
+        self.max_iter = max_iter
+        self.tol = tol
+        self.fit_intercept = fit_intercept
+        self.normalize = normalize
 
         # default setting
-        self.alpha = config.alpha_lasso
+        self.alpha = alpha
 
         # cross-validation setting
-        self.cv = config.cv_lasso
-        self.cv_num_folds = config.cv_num_folds
+        self.cv = cv
+        self.cv_num_folds = cv_num_folds
+        self.regressor = None
 
-    def __call__(self):
+    def fit(self, X, y):
         if self.cv:
-            mdl = linear_model.LassoCV(
+            self.regressor = linear_model.LassoCV(
                 cv=self.cv_num_folds,
                 fit_intercept=self.fit_intercept,
                 normalize=self.normalize,
@@ -184,14 +210,16 @@ class Lasso():
                 tol=self.tol,
             )
         else:
-            mdl = linear_model.Lasso(
+            self.regressor = linear_model.Lasso(
                 alpha=self.alpha,
                 fit_intercept=self.fit_intercept,
                 normalize=self.normalize,
                 max_iter=self.max_iter,
                 tol=self.tol,
             )
-        return mdl
+
+        self.regressor.fit(X,y)
+        return self
 
 
 class ElasticNet():
@@ -201,28 +229,39 @@ class ElasticNet():
             1 / (2 * n_samples) * ||y - Xw||^2_2
             + alpha * l1_ratio * ||w||_1
             + 0.5 * alpha * (1 - l1_ratio) * ||w||^2_2
+
+    Notes:: l1_ratio parmameters means the coefficient of L1 regularization, 
+            the coefficient of L2 regularization is (1-l1_ratio).
     """
 
     def __init__(self,
-                 config,
+                 max_iter=1000,
+                 tol=1e-4,
+                 fit_intercept=True,
+                 normalize=True,
+                 alpha=0.01,
+                 l1_ratio=0.2,
+                 cv=False,
+                 cv_num_folds=5,
                  **kwargs):
         # common setting
-        self.max_iter = config.max_iter
-        self.tol = config.tol
-        self.fit_intercept = config.fit_intercept,
-        self.normalize = config.normalize
+        self.max_iter = max_iter
+        self.tol = tol
+        self.fit_intercept = fit_intercept,
+        self.normalize = normalize
 
         # default setting
-        self.alpha = config.alpha_elasticnet
-        self.l1_ratio = config.l1_ratio
+        self.alpha = alpha
+        self.l1_ratio = l1_ratio
 
         # cross-validation setting
-        self.cv = config.cv_elasticnet
-        self.cv_num_folds = config.cv_num_folds
+        self.cv = cv
+        self.cv_num_folds = cv_num_folds
+        self.regressor = None
 
-    def __call__(self):
+    def fit(self,X, y):
         if self.cv:
-            mdl = linear_model.ElasticNetCV(
+            self.regressor = linear_model.ElasticNetCV(
                 l1_ratio=self.l1_ratio,
                 cv=self.cv_num_folds,
                 fit_intercept=self.fit_intercept,
@@ -231,7 +270,7 @@ class ElasticNet():
                 tol=self.tol,
             )
         else:
-            mdl = linear_model.ElasticNet(
+            self.regressor = linear_model.ElasticNet(
                 alpha=self.alpha,
                 l1_ratio=self.l1_ratio,
                 fit_intercept=self.fit_intercept,
@@ -239,26 +278,53 @@ class ElasticNet():
                 max_iter=self.max_iter,
                 tol=self.tol,
             )
-        return mdl
+
+        self.regressor.fit(X,y)
+        return self
+
+
+class expand_linear_model():
+    """expand edition of linear model from sklearn library.
+    """
+
+    def estimate(self, algorithm=None):
+        """
+        1. automatic relevance determination, 
+        Compared to the OLS (ordinary least squares) estimator, the coefficient 
+        weights are slightly shifted toward zeros, which stabilises them. 
+        2. stochastic gradient descent method
+        NOTE: could used for different penalty
+        3. online passive-aggressive
+        They are similar to the Perceptron in that they do not require a 
+        learning rate. However, contrary to the Perceptron, they include a 
+        regularization parameter C.
+        """
+        if algorithm == 1:
+            reg = linear_model.ARDRegression()
+        elif algorithm == 2:
+            reg = linear_model.SGDRegressor()
+        elif algorithm == 3:
+            reg = linear_model.PassiveAggressiveRegressor()
+        return reg
+
+    def robust(self, algorithm=None):
+        """
+        Robust regression aims to fit a regression model in the presence of 
+        corrupt data: either outliers, or error in the model.
+        1. RANSAC
+        2. Theil-Sen
+        3. Huber
+        """
+        if algorithm == 1:
+            reg = linear_model.RANSACRegressor()
+        elif algorithm == 2:
+            reg = linear_model.TheilSenRegressor()
+        elif algorithm == 3:
+            reg = linear_model.HuberRegressor()
+        return reg
+
 
 
 if __name__ == "__main__":
 
-    X = np.array([[1, 2], [3, 4], [3, 2], [1, 3], [3, 4]])
-    y = np.array([4, 5, 6, 7, 9])
-
-    mdl = get_lr_mdl(mdl_name='LR')
-    mdl.fit(X, y)
-    print(mdl.coef_)
-
-    mdl = get_lr_mdl(mdl_name='Ridge')
-    mdl.fit(X, y)
-    print(mdl.coef_)
-
-    mdl = get_lr_mdl(mdl_name='Lasso')
-    mdl.fit(X, y)
-    print(mdl.coef_)
-
-    mdl = get_lr_mdl(mdl_name='ElasticNet')
-    mdl.fit(X, y)
-    print(mdl.coef_)
+    pass

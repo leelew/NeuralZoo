@@ -45,21 +45,6 @@ class Metrics():
         """
         metrics = {}
         
-        validate = validate.reshape(self.T, self.H*self.W)
-        forecast = forecast.reshape(self.T, self.H*self.W)
-
-        metrics['evs'] = explained_variance_score(validate, forecast, multioutput='raw_values').reshape(self.H*self.W)
-        metrics['mae'] = mean_absolute_error(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        metrics['mse'] = mean_squared_error(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        #metrics['msle'] = mean_squared_log_error(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        #metrics['me'] = max_error(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        metrics['r2'] = r2_score(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        #metrics['medae'] = median_absolute_error(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        #metrics['mpd'] = mean_poisson_deviance(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-        #metrics['mgd'] = mean_gamma_deviance(validate,forecast,multioutput='raw_values').reshape(self.H*self.W)
-        #metrics['mtd'] = mean_tweedie_deviance(validate, forecast,multioutput='raw_values').reshape(self.H*self.W)
-
-        print(metrics['r2'].reshape(-1,))
         return metrics
     
     @staticmethod
@@ -79,7 +64,7 @@ class Metrics():
         """
         pass
 
-    def get_importance_metrics(self):
+    def get_importance_metrics(self, reg,x_train):
         """
         """
         # generate importance array
@@ -95,4 +80,4 @@ class Metrics():
                     importance = False
                     print('This is not a linear regression or tree regression')
 
-        return y_predict, importance
+        return importance
