@@ -95,10 +95,12 @@ if __name__ == "__main__":
     parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
     config = parse.parse_args()
 
-    #main(mdl_name=config.mdl_name, task=100)
+    main(mdl_name=config.mdl_name, task=100)
 
+    """
     for task in range(200):
         print('task = {}'.format(task))
         print(config.mdl_name)
 
         main(mdl_name=config.mdl_name, task=task)
+    """

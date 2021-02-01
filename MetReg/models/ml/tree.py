@@ -1,16 +1,19 @@
-from sklearn import tree, ensemble
-import xgboost
-import lightgbm
-import warnings
 
-warnings.filterwarnings("ignore")
+try:
+    import lightgbm
+    import xgboost
+except:
+    raise KeyError('run `pip3 install lightgbm xgboost`')
+
+from MetReg.base.base_model import base_model
+from sklearn import ensemble, tree
 
 
-class DT():
+class DT(base_model):
     """implementation of base decision tree regression.
 
     Args:
-    criterion (str, optional): 
+    criterion (str, optional):
         could be {"mse", "friedman_mse", "mae", "poisson"}, Defaults to 'mse'.
         The function to measure the quality of a split. Supported criteria
         are "mse" for the mean squared error, which is equal to variance
@@ -25,11 +28,11 @@ class DT():
         The strategy used to choose the split at each node. Supported
         strategies are "best" to choose the best split and "random" to choose
         the best random split.
-    max_depth (int, optional): 
+    max_depth (int, optional):
         The maximum depth of the tree. If None, then nodes are expanded until
         all leaves are pure or until all leaves contain less than
         min_samples_split samples. Defaults to None.
-    min_sample_split (int or float, optional): 
+    min_sample_split (int or float, optional):
         The minimum number of samples required to split an internal node:
         - If int, then consider `min_samples_split` as the minimum number.
         - If float, then `min_samples_split` is a fraction and
@@ -45,11 +48,11 @@ class DT():
         - If float, then `min_samples_leaf` is a fraction and
           `ceil(min_samples_leaf * n_samples)` are the minimum
           number of samples for each node. Defaults to 1.
-    min_weight_fraction_leaf (float, optional): 
+    min_weight_fraction_leaf (float, optional):
         The minimum weighted fraction of the sum total of weights (of all
         the input samples) required to be at a leaf node. Samples have
         equal weight when sample_weight is not provided. Defaults to 0.0.
-    max_features ([type], optional): 
+    max_features ([type], optional):
         The number of features to consider when looking for the best split:
         - If int, then consider `max_features` features at each split.
         - If float, then `max_features` is a fraction and
@@ -90,8 +93,10 @@ class DT():
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
 
-    def __call__(self):
-        mdl = tree.DecisionTreeRegressor(
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = tree.DecisionTreeRegressor(
             criterion=self.criterion,
             splitter=self.splitter,
             max_depth=self.max_depth,
@@ -100,7 +105,15 @@ class DT():
             min_weight_fraction_leaf=self.min_weight_fraction_leaf,
             max_features=self.max_features,
         )
-        return mdl
+        self.regressor.fit(X, y)
+
+        return self
+
+    def predict(self, X):
+        if self.regressor is None:
+            raise NotImplementedError('fit model before!')
+        else:
+            return self.regressor.predict(X)
 
 
 class RF(DT):
@@ -124,21 +137,30 @@ class RF(DT):
             max_features=max_features,
         )
         self.n_estimators = n_estimators
-        self.n_jobs = -1
-        self.verbose = 3
+        self.n_jobs = n_jobs
+        self.verbose = verbose
+        self.regressor = None
 
-    def __call__(self):
-        mdl = ensemble.RandomForestRegressor(
+    def fit(self, X, y):
+        self.regressor = ensemble.RandomForestRegressor(
             criterion=self.criterion,
             max_depth=self.max_depth,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
             min_weight_fraction_leaf=self.min_weight_fraction_leaf,
             max_features=self.max_features,
-            n_jobs=self.n_jobs,
+            n_jobs=self.n_jobs,  # care memory, default set as using all CPU.
             verbose=self.verbose,
         )
-        return mdl
+        return self
+
+    @staticmethod
+    def get_hyperparameter_search_space():
+        pass
+
+    def __repr__(self):
+        return {'short name': 'RF',
+                'name': 'Random Forest'}
 
 
 class GBDT(RF, DT):
@@ -168,8 +190,10 @@ class GBDT(RF, DT):
         self.learning_rate = 0.1
         self.subsample = subsample
 
-    def __call__(self):
-        mdl = ensemble.GradientBoostingRegressor(
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = ensemble.GradientBoostingRegressor(
             loss=self.loss,
             learning_rate=self.learning_rate,
             subsample=self.subsample,
@@ -181,7 +205,9 @@ class GBDT(RF, DT):
             min_weight_fraction_leaf=self.min_weight_fraction_leaf,
             max_features=self.max_features,
         )
-        return mdl
+
+        self.regressor.fit(X, y)
+        return self
 
 
 class Xgboost(GBDT):
@@ -208,8 +234,10 @@ class Xgboost(GBDT):
         self.colsample_bytree = colsample_bytree
         self.eta = eta
 
-    def __call__(self):
-        mdl = xgboost.XGBRegressor(
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = xgboost.XGBRegressor(
             learning_rate=self.learning_rate,
             subsample=self.subsample,
             n_estimators=self.n_estimators,
@@ -219,7 +247,8 @@ class Xgboost(GBDT):
             colsample_bytree=self.colsample_bytree,
             eta=self.eta,
         )
-        return mdl
+        self.regressor.fit(X, y)
+        return self
 
 
 class LightGBM(Xgboost):
@@ -252,8 +281,10 @@ class LightGBM(Xgboost):
         self.reg_alpha = reg_alpha
         self.reg_lambda = reg_lambda
 
-    def __call__(self):
-        mdl = lightgbm.LGBMRegressor(
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = lightgbm.LGBMRegressor(
             num_leaves=self.num_leaves,
             max_depth=self.max_depth,
             subsample=self.subsample,
@@ -265,25 +296,11 @@ class LightGBM(Xgboost):
             reg_alpha=self.reg_alpha,
             reg_lambda=self.reg_lambda,
         )
-        return mdl
+
+        self.regressor.fit(X, y)
+        return self
 
 
 if __name__ == "__main__":
-    import numpy as np
-    X = np.array([[1, 2], [3, 4], [3, 2], [1, 3], [3, 4]])
-    y = np.array([4, 5, 6, 7, 9])
 
-    mdl = DT()().fit(X, y)
-    print(mdl.feature_importances_)
-
-    mdl = RF()().fit(X, y)
-    print(mdl.feature_importances_)
-
-    mdl = GBDT()().fit(X, y)
-    print(mdl.feature_importances_)
-
-    mdl = Xgboost()().fit(X, y)
-    print(mdl.feature_importances_)
-
-    mdl = LightGBM()().fit(X, y)
-    print(mdl.feature_importances_)
+    pass

@@ -10,6 +10,7 @@ from MetReg.utils.parser import get_lr_args
 from MetReg.models.ml.svr import svr
 from MetReg.models.ml.gaussian import GP
 from MetReg.models.ml.elm import elm
+from MetReg.models.ml.automl import automl
 
 
 class model_generator:
@@ -33,6 +34,8 @@ class model_generator:
             mdl = self._get_svr_mdl(self.mdl_name)
         elif 'elm' in self.mdl_name.lower():
             mdl = self._get_elm_mdl(self.mdl_name)
+        elif 'auto' in self.mdl_name.lower():
+            mdl = self._get_automl_mdl(self.mdl_name)
         else:
             raise NameError('Have not support this model!')
         return mdl
@@ -86,6 +89,12 @@ class model_generator:
             'bilstm': bilstm()(),
         }
         return rnn_hash[mdl_name.split('.')[-1]]
+
+    def _get_automl_mdl(self, mdl_name):
+
+        automl_hash = {
+            'ml': automl()
+        }
 
 
 class model_benchmarker:
