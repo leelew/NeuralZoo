@@ -5,11 +5,11 @@ try:
 except:
     raise KeyError('run `pip3 install lightgbm xgboost`')
 
-from MetReg.base.base_model import base_model
+from MetReg.base.base_model import BaseModel
 from sklearn import ensemble, tree
 
 
-class DT(base_model):
+class BaseTreeRegressor(BaseModel):
     """implementation of base decision tree regression.
 
     Args:
@@ -106,17 +106,11 @@ class DT(base_model):
             max_features=self.max_features,
         )
         self.regressor.fit(X, y)
-
         return self
 
-    def predict(self, X):
-        if self.regressor is None:
-            raise NotImplementedError('fit model before!')
-        else:
-            return self.regressor.predict(X)
 
-
-class RF(DT):
+class RandomForestRegressor(BaseTreeRegressor, BaseModel):
+    """Random forest regressor."""
 
     def __init__(self,
                  n_estimators=100,
@@ -152,6 +146,7 @@ class RF(DT):
             n_jobs=self.n_jobs,  # care memory, default set as using all CPU.
             verbose=self.verbose,
         )
+        self.regressor.fit(X, y)
         return self
 
     @staticmethod
@@ -163,29 +158,39 @@ class RF(DT):
                 'name': 'Random Forest'}
 
 
-class adaboost(RF):
-    def __init__(self, ):
-        self.regressor = None
+class ExtraTreesRegressor(RandomForestRegressor, BaseModel):
 
-    def fit(self, X, y):
-        self.regressor = ensemble.AdaBoostRegressor()
-        self.regressor.fit(X,y)
-    
-        return self
-
-
-class etr(RF):
-    
     def __init__(self, ):
         self.regressor = None
 
     def fit(self, X, y):
         self.regressor = ensemble.ExtraTreesRegressor()
-        self.regressor.fit(X,y)
-    
-        return self 
+        self.regressor.fit(X, y)
 
-class GBDT(RF, DT):
+        return self
+
+
+class DeepForestRegressor(RandomForestRegressor, BaseModel):
+
+    def __init__(self):
+        self.regressor = None
+
+    def fit(self, X, y):
+        pass
+
+
+class AdaptiveBoostingRegressor(RandomForestRegressor, BaseModel):
+    def __init__(self, ):
+        self.regressor = None
+
+    def fit(self, X, y):
+        self.regressor = ensemble.AdaBoostRegressor()
+        self.regressor.fit(X, y)
+
+        return self
+
+
+class GradientBoostingRegressor(RandomForestRegressor, BaseModel):
 
     def __init__(self,
                  loss='ls',
@@ -232,17 +237,16 @@ class GBDT(RF, DT):
         return self
 
 
-class Xgboost(GBDT):
+class ExtremeGradientBoostingRegressor(GradientBoostingRegressor, BaseModel):
 
     def __init__(self,
                  n_estimators=100,
-                 max_depth=None,
-                 learning_rate=None,
-                 tree_method=None,
-                 subsample=None,
-                 min_child_weight=None,
-                 colsample_bytree=None,
-                 eta=0.05,
+                 max_depth=6,
+                 learning_rate=0.3,
+                 tree_method='auto',
+                 subsample=1,
+                 min_child_weight=1,
+                 colsample_bytree=1,
                  ):
         super().__init__(
             n_estimators=n_estimators,
@@ -254,7 +258,6 @@ class Xgboost(GBDT):
         self.tree_method = tree_method
         self.min_child_weight = min_child_weight
         self.colsample_bytree = colsample_bytree
-        self.eta = eta
 
         self.regressor = None
 
@@ -267,13 +270,12 @@ class Xgboost(GBDT):
             tree_method=self.tree_method,
             min_child_weight=self.min_child_weight,
             colsample_bytree=self.colsample_bytree,
-            eta=self.eta,
         )
         self.regressor.fit(X, y)
         return self
 
 
-class LightGBM(Xgboost):
+class LightGradientBoostingRegressor(ExtremeGradientBoostingRegressor, BaseModel):
 
     def __init__(self,
                  num_leaves=31,
@@ -321,6 +323,10 @@ class LightGBM(Xgboost):
 
         self.regressor.fit(X, y)
         return self
+
+
+class CatBoostingRegressor(BaseModel):
+    pass
 
 
 if __name__ == "__main__":

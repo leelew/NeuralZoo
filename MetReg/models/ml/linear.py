@@ -1,13 +1,10 @@
-
-import warnings
-
 import numpy as np
 from sklearn import linear_model
 
-warnings.filterwarnings("ignore")
+from MetReg.base.base_model import BaseModel
 
 
-class LR():
+class BaseLinearRegressor(BaseModel):
     """implementation of base linear regression.
 
     Ordinary least squares Linear Regression.LinearRegression fits a linear 
@@ -39,7 +36,6 @@ class LR():
                  **kwargs):
         self.fit_intercept = fit_intercept
         self.normalize = normalize
-
         self.regressor = None
 
     def fit(self, X, y):
@@ -47,12 +43,11 @@ class LR():
             fit_intercept=self.fit_intercept,
             normalize=self.normalize)
 
-
-        self.regressor.fit(X,y)
+        self.regressor.fit(X, y)
         return self
 
 
-class Ridge():
+class RidgeRegressor(BaseLinearRegressor, BaseModel):
     """Linear least squares with l2 regularization.
 
     Minimizes the objective function::
@@ -125,7 +120,7 @@ class Ridge():
                  alpha=1.0,
                  solver='auto',
                  cv=False,
-                 cv_alphas=[0.1,1.0,10.0],
+                 cv_alphas=[0.1, 1.0, 10.0],
                  cv_num_folds=5,
                  **kwargs):
         # common setting
@@ -161,11 +156,11 @@ class Ridge():
                 tol=self.tol,
                 solver=self.solver)
 
-        self.regressor.fit(X,y)
+        self.regressor.fit(X, y)
         return self
 
 
-class Lasso():
+class LassoRegressor(BaseLinearRegressor, BaseModel):
     """Linear Model trained with L1 prior as regularizer.
 
     The optimization objective for Lasso is:
@@ -175,6 +170,8 @@ class Lasso():
     useful in some contexts due to its tendency to prefer solutions with fewer 
     non-zero coefficients, effectively reducing the number of features upon 
     which the given solution is dependent. 
+
+
     """
 
     def __init__(self,
@@ -218,11 +215,11 @@ class Lasso():
                 tol=self.tol,
             )
 
-        self.regressor.fit(X,y)
+        self.regressor.fit(X, y)
         return self
 
 
-class ElasticNet():
+class ElasticRegressor(BaseLinearRegressor, BaseModel):
     """Linear regression with combined L1 and L2 priors as regularizer.
 
     Minimizes the objective function::
@@ -259,7 +256,7 @@ class ElasticNet():
         self.cv_num_folds = cv_num_folds
         self.regressor = None
 
-    def fit(self,X, y):
+    def fit(self, X, y):
         if self.cv:
             self.regressor = linear_model.ElasticNetCV(
                 l1_ratio=self.l1_ratio,
@@ -279,13 +276,12 @@ class ElasticNet():
                 tol=self.tol,
             )
 
-        self.regressor.fit(X,y)
+        self.regressor.fit(X, y)
         return self
 
 
-class expand_linear_model():
-    """expand edition of linear model from sklearn library.
-    """
+class ExpandLinearRegressor(BaseLinearRegressor, BaseModel):
+    """expand edition of linear model from sklearn library."""
 
     def estimate(self, algorithm=None):
         """
@@ -324,7 +320,8 @@ class expand_linear_model():
         return reg
 
 
-
 if __name__ == "__main__":
 
-    pass
+    a = LassoRegressor()
+    a.fit([1, 2, 3], [2, 3, 1])
+    a.predict([1, 3, 4])

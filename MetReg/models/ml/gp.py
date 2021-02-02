@@ -1,18 +1,14 @@
-from MetReg.base.base_model import base_model
-from sklearn.gaussian_process import GaussianProcessRegressor, kernels
+from MetReg.base.base_model import BaseModel
+from sklearn import gaussian_process
 
 
-class gaussian_process(base_model):
-    """[summary]
-
-    Args:
-        base_model ([type]): [description]
-    """
+class GaussianProcessRegressor(BaseModel):
+    """[summary]"""
 
     def __init__(self,
-                 alpha,
-                 thetaL,
-                 thetaU,
+                 alpha=1e-10,
+                 thetaL=1e-5,
+                 thetaU=1e5,
                  random_state=None,
                  ):
         self.alpha = float(alpha)
@@ -24,11 +20,11 @@ class gaussian_process(base_model):
 
     def fit(self, X, y=None):
         n_features = X.shape[-1]
-        kernel = kernels.RBF(
+        kernel = gaussian_process.kernels.RBF(
             length_scale=[1.0]*n_features,
             length_scale_bounds=[(self.thetaL, self.thetaU)]*n_features)
 
-        self.regressor = GaussianProcessRegressor(
+        self.regressor = gaussian_process.GaussianProcessRegressor(
             kernel=kernel,
             n_restarts_optimizer=10,
             optimizer='fmin_l_bfgs_b',
@@ -40,12 +36,6 @@ class gaussian_process(base_model):
 
         self.regressor.fit(X, y)
         return self
-
-    def predict(self, X):
-        if self.regressor is None:
-            raise NotImplementedError('fit model before!')
-        else:
-            return self.regressor.predict(X)
 
     @staticmethod
     def get_hyperparameter_search_space():

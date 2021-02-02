@@ -18,7 +18,7 @@ np.random.seed(1)
 tf.compat.v1.set_random_seed(13)
 
 
-class convlstm():
+class ConvLSTMGANRegressor():
 
     """implement of General Advertisal Network constructed of
     ConvLSTM (G) and CNN(D).
@@ -115,11 +115,12 @@ class convlstm():
 
         S, T, H, W, F = x_train.shape
 
-        train_ds = np.concatenate([x_train.reshape(S, H, W, T*F), y_train[:, :, :, np.newaxis]], axis=-1)
+        train_ds = np.concatenate(
+            [x_train.reshape(S, H, W, T*F), y_train[:, :, :, np.newaxis]], axis=-1)
         np.random.shuffle(train_ds)
 
         index = np.array(train_ds[:, :, :, :-1]).reshape(S, T, H, W, F)
-        label = np.array(train_ds[:,:,:,-1]).reshape(S, H, W, 1)
+        label = np.array(train_ds[:, :, :, -1]).reshape(S, H, W, 1)
         print(index.shape)
 
         # construct `tf.data.Dataset`
@@ -135,7 +136,6 @@ class convlstm():
                                 x, y)
 
     def train_keras(self, x_train, y_train):
-
         """
         S, T, H, W, F = x_train.shape
 
@@ -152,7 +152,6 @@ class convlstm():
                 100000).batch(
                     32, drop_remainder=True)
         """
-
 
         self.gen.compile(optimizer=self.optimizer, loss=convlstm.G_loss)
 
