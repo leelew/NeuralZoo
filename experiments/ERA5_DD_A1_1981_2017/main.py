@@ -3,7 +3,7 @@ import pickle
 from six.moves import cPickle
 import matplotlib.pyplot as plt
 import numpy as np
-from MetReg.api.model_io import (model_generator,
+from MetReg.api.model_io import (ModelInterface,
                                  model_saver,)
 from sklearn.metrics import r2_score
 import json
@@ -46,18 +46,12 @@ def main(mdl_name='ml.tree.lightgbm',
         for j in range(NLON):
             if not np.isnan(mask[i, j]):
                 # training & saving trained-models
-                mdl = model_generator(mdl_name)()
+                mdl = ModelInterface(mdl_name=mdl_name).get_model()
                 if mdl_name.split('.')[0] == 'ml':
-                    try:
-                        mdl.fit(
-                            X_train[:, :, i, j, :].reshape(
-                                X_train.shape[0], -1),
-                            y_train[:, 0, i, j, 0])
-                    except:
-                        mdl.train(
-                            X_train[:, :, i, j, :].reshape(
-                                X_train.shape[0], -1),
-                            y_train[:, 0, i, j, 0])
+                    mdl.fit(
+                        X_train[:, :, i, j, :].reshape(
+                            X_train.shape[0], -1),
+                        y_train[:, 0, i, j, 0])
 
                     y_predict = mdl.predict(
                         X_valid[:, :, i, j, :].reshape(X_valid.shape[0], -1))
@@ -95,7 +89,7 @@ if __name__ == "__main__":
     parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
     config = parse.parse_args()
 
-    main(mdl_name=config.mdl_name, task=100)
+    main(mdl_name=config.mdl_name, task=0)
 
     """
     for task in range(200):
