@@ -1,7 +1,8 @@
 
 from sklearn import svm
 from MetReg.base.base_model import BaseModel
-
+import numpy as np
+np.random.seed(1)
 
 class LinearSVRegressor(BaseModel):
 

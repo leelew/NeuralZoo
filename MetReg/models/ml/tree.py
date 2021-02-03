@@ -7,6 +7,8 @@ except:
 
 from MetReg.base.base_model import BaseModel
 from sklearn import ensemble, tree
+import numpy as np
+np.random.seed(1)
 
 
 class BaseTreeRegressor(BaseModel):
@@ -121,7 +123,7 @@ class RandomForestRegressor(BaseTreeRegressor, BaseModel):
                  min_weight_fraction_leaf=0.0,
                  max_features='auto',
                  n_jobs=-1,
-                 verbose=3):
+                 verbose=0):
         super().__init__(
             criterion=criterion,
             max_depth=max_depth,
@@ -160,11 +162,13 @@ class RandomForestRegressor(BaseTreeRegressor, BaseModel):
 
 class ExtraTreesRegressor(RandomForestRegressor, BaseModel):
 
-    def __init__(self, ):
+    def __init__(self, n_jobs=-1):
         self.regressor = None
+        self.n_jobs = n_jobs
 
     def fit(self, X, y):
-        self.regressor = ensemble.ExtraTreesRegressor()
+        self.regressor = ensemble.ExtraTreesRegressor(
+            n_jobs=self.n_jobs,)
         self.regressor.fit(X, y)
 
         return self
@@ -247,6 +251,7 @@ class ExtremeGradientBoostingRegressor(GradientBoostingRegressor, BaseModel):
                  subsample=1,
                  min_child_weight=1,
                  colsample_bytree=1,
+                 n_jobs=-1
                  ):
         super().__init__(
             n_estimators=n_estimators,
@@ -258,7 +263,7 @@ class ExtremeGradientBoostingRegressor(GradientBoostingRegressor, BaseModel):
         self.tree_method = tree_method
         self.min_child_weight = min_child_weight
         self.colsample_bytree = colsample_bytree
-
+        self.n_jobs = n_jobs
         self.regressor = None
 
     def fit(self, X, y):
@@ -270,6 +275,7 @@ class ExtremeGradientBoostingRegressor(GradientBoostingRegressor, BaseModel):
             tree_method=self.tree_method,
             min_child_weight=self.min_child_weight,
             colsample_bytree=self.colsample_bytree,
+            n_jobs=self.n_jobs,
         )
         self.regressor.fit(X, y)
         return self

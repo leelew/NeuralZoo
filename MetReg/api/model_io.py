@@ -44,6 +44,8 @@ class ModelInterface():
             mdl = self._get_mlp_mdl(self.mdl_name)
         elif 'elm' in self.mdl_type.lower():
             mdl = self._get_elm_mdl(self.mdl_name)
+        elif 'knn' in self.mdl_type.lower():
+            mdl = self._get_knn_mdl(self.mdl_name)
 
         elif 'rnn' in self.mdl_type.lower():
             mdl = self._get_rnn_mdl(self.mdl_name)

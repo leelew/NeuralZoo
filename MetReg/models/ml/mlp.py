@@ -1,12 +1,13 @@
 from MetReg.base.base_model import BaseModel
 from sklearn import neural_network
-
+import numpy as np
+np.random.seed(1)
 
 class MLPRegressor(BaseModel):
 
     def __init__(self,
-                 hidden_layers_sizes=(100,),
-                 activation='relu',
+                 hidden_layers_sizes=(16,),
+                 activation='logistic',
                  alpha=0.0001,
                  learning_rate_init=0.001, early_stopping=False, solver='adam', batch_size='auto',
                  n_iter_no_change=10, tol=0.0001, shuffle=True, beta_1=0.9, beta_2=0.999, epsilon=1e-08,

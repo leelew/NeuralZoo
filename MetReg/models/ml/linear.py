@@ -2,6 +2,8 @@ import numpy as np
 from sklearn import linear_model
 
 from MetReg.base.base_model import BaseModel
+import numpy as np
+np.random.seed(1)
 
 
 class BaseLinearRegressor(BaseModel):
@@ -113,11 +115,11 @@ class RidgeRegressor(BaseLinearRegressor, BaseModel):
     """
 
     def __init__(self,
-                 max_iter=1000,
-                 tol=1e-4,
+                 max_iter=100,
+                 tol=1e-3,
                  fit_intercept=True,
                  normalize=True,
-                 alpha=1.0,
+                 alpha=4,
                  solver='auto',
                  cv=False,
                  cv_alphas=[0.1, 1.0, 10.0],

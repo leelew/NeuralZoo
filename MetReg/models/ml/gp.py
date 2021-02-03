@@ -1,6 +1,7 @@
 from MetReg.base.base_model import BaseModel
 from sklearn import gaussian_process
-
+import numpy as np
+np.random.seed(1)
 
 class GaussianProcessRegressor(BaseModel):
     """[summary]"""
@@ -26,12 +27,12 @@ class GaussianProcessRegressor(BaseModel):
 
         self.regressor = gaussian_process.GaussianProcessRegressor(
             kernel=kernel,
-            n_restarts_optimizer=10,
+            n_restarts_optimizer=3,
             optimizer='fmin_l_bfgs_b',
             alpha=self.alpha,
-            copy_X_train=True,  # copy training data. care memory.
+            copy_X_train=False,  # copy training data. care memory.
             random_state=self.random_state,
-            normalize_y=True,
+            normalize_y=False,
         )
 
         self.regressor.fit(X, y)

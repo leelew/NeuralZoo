@@ -1,6 +1,8 @@
 
 from hpelm import ELM
 from MetReg.base.base_model import BaseModel
+import numpy as np
+np.random.seed(1)
 """
 from sklearn_extensions.extreme_learning_machines.elm import (ELMRegressor,
                                                               GenELMRegressor)

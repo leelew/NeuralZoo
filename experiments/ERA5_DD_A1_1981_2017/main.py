@@ -7,6 +7,7 @@ from MetReg.api.model_io import (ModelInterface,
                                  model_saver,)
 from sklearn.metrics import r2_score
 import json
+import time
 
 
 def _read_inputs(task,
@@ -42,12 +43,14 @@ def main(mdl_name='ml.tree.lightgbm',
     # saved model
     saved_mdl = [[] for i in range(NLAT)]
 
+    a = time.time()
     for i in range(NLAT):
         for j in range(NLON):
             if not np.isnan(mask[i, j]):
                 # training & saving trained-models
                 mdl = ModelInterface(mdl_name=mdl_name).get_model()
                 if mdl_name.split('.')[0] == 'ml':
+
                     mdl.fit(
                         X_train[:, :, i, j, :].reshape(
                             X_train.shape[0], -1),
@@ -73,7 +76,8 @@ def main(mdl_name='ml.tree.lightgbm',
                 saved_mdl[i].append(mdl)
             else:
                 saved_mdl[i].append(None)
-
+    b = time.time()
+    print(b-a)
     try:
         model_saver(saved_mdl,
                     dir_save='/hard/lilu/saved_models/'+mdl_name,
@@ -89,12 +93,9 @@ if __name__ == "__main__":
     parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
     config = parse.parse_args()
 
-    main(mdl_name=config.mdl_name, task=0)
+    #main(mdl_name=config.mdl_name, task=0)
 
-    """
     for task in range(200):
         print('task = {}'.format(task))
-        print(config.mdl_name)
 
         main(mdl_name=config.mdl_name, task=task)
-    """
