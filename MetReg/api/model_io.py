@@ -17,6 +17,8 @@ from MetReg.models.ml.tree import (AdaptiveBoostingRegressor,
                                    LightGradientBoostingRegressor,
                                    RandomForestRegressor)
 
+from MetReg.models.dl.rnn import BaseRNNRegressor
+
 
 class ModelInterface():
     """generate model according model name."""
@@ -107,7 +109,9 @@ class ModelInterface():
         return elm_hash[mdl_name]
 
     def _get_rnn_mdl(self, mdl_name):
-        rnn_hash = {}
+        rnn_hash = {
+            'base': BaseRNNRegressor()
+        }
         return rnn_hash[mdl_name]
 
 

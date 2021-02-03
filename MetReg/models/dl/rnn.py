@@ -1,30 +1,37 @@
-from tensorflow.keras import models
+from tensorflow.keras import models, Model
 from tensorflow.keras import layers
 from MetReg.base.base_model import BaseModel
 
+import os
 
-class RNNRegressor(BaseModel):
+os.environ['TP_CPP_MIN_LOG_LEVEL']=2
+class BaseRNNRegressor(Model):
 
     def __init__(self,
                  hidden_layers_sizes=(64,),
                  activation='relu',):
+        
         self.regressor = None
         self.hidden_layers_sizes = hidden_layers_sizes
 
-    def fit(self, X, y):
-        n_features = X.shape[-1]
-        n_steps = X.shape[-2]
+    def call(self, inputs):
+        n_features = inputs.shape[-1]
+        n_steps = inputs.shape[-2]
 
         self.regressor = models.Sequential()
         for i, n_units in enumerate(self.hidden_layers_sizes):
             self.regressor.add(layers.RNN(units=n_units))
         self.regressor.add(layers.Dense(1))
 
+
+
         self.regressor.build(input_shape=(n_steps, n_features))
 
-        self.regressor.compile()
-        self.regressor.fit(X, y)
-        return self
+        return self.regressor(inputs)
+
+
+
+    
 
 
 class lstm:

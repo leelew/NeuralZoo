@@ -333,6 +333,27 @@ class train_gan():
                 
     def train(self, x_train, y_train): pass
 
+
+
+
+class Trainer(object):
+
+    def __init__(self, 
+                model,
+                loss_func,
+                optimizer,
+                logger,
+                device,
+                ):
+        pass
+
+    def prepare(self): pass
+
+    def to(self, device): pass
+
+    
+
+
          
 
 
