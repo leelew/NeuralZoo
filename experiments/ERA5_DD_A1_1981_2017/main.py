@@ -3,8 +3,7 @@ import pickle
 from six.moves import cPickle
 import matplotlib.pyplot as plt
 import numpy as np
-from MetReg.api.model_io import (ModelInterface,
-                                 model_saver,)
+from MetReg.api.model_io import ModelInterface, model_saver
 from sklearn.metrics import r2_score
 import json
 import time

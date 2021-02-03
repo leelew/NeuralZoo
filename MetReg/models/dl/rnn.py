@@ -4,48 +4,45 @@ from MetReg.base.base_model import BaseModel
 
 import os
 
-os.environ['TP_CPP_MIN_LOG_LEVEL']=2
+os.environ['TP_CPP_MIN_LOG_LEVEL'] = '3'
+
+
 class BaseRNNRegressor(Model):
 
     def __init__(self,
                  hidden_layers_sizes=(64,),
                  activation='relu',):
-        
+        super().__init__()
         self.regressor = None
         self.hidden_layers_sizes = hidden_layers_sizes
+
+        self.rnn = []
+        for i, n_units in enumerate(self.hidden_layers_sizes):
+            self.rnn.append(layers.SimpleRNN(units=n_units))
+
+        self.rnn = layers.SimpleRNN(units=64)
+        self.dense = layers.Dense(1)
 
     def call(self, inputs):
         n_features = inputs.shape[-1]
         n_steps = inputs.shape[-2]
 
-        self.regressor = models.Sequential()
-        for i, n_units in enumerate(self.hidden_layers_sizes):
-            self.regressor.add(layers.RNN(units=n_units))
-        self.regressor.add(layers.Dense(1))
+        x = self.rnn(inputs)
+        return self.dense(x)
 
 
+class LSTMRegressor(BaseRNNRegressor):
 
-        self.regressor.build(input_shape=(n_steps, n_features))
+    def __init__(self):
+        super().__init__()
 
-        return self.regressor(inputs)
+        self.lstm = layers.LSTM(units=64)
+        self.dense = layers.Dense(1)
 
+    def call(self, inputs):
 
-
-    
-
-
-class lstm:
-
-    def __init__(self): pass
-
-    def __call__(self):
-
-        mdl = models.Sequential()
-        mdl.add(tf.keras.layers.LSTM(units=64, input_shape=(10, 3)))
-        mdl.add(tf.keras.layers.Dense(1))
-        mdl.summary()
-
-        return mdl
+        x = self.lstm(inputs)
+        return self.dense(x)
 
 
 class rnn:

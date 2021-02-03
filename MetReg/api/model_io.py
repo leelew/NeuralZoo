@@ -1,23 +1,25 @@
-import os
-import pickle
-
-from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
-from MetReg.models.ml.elm import ExtremeLearningRegressor
-from MetReg.models.ml.gp import GaussianProcessRegressor
-from MetReg.models.ml.knn import KNNRegressor
-from MetReg.models.ml.linear import (BaseLinearRegressor, ElasticRegressor,
-                                     ExpandLinearRegressor, LassoRegressor,
-                                     RidgeRegressor)
-from MetReg.models.ml.mlp import MLPRegressor
-from MetReg.models.ml.svr import LinearSVRegressor, SVRegressor
+from MetReg.models.dl.rnn import BaseRNNRegressor, LSTMRegressor
 from MetReg.models.ml.tree import (AdaptiveBoostingRegressor,
                                    BaseTreeRegressor, ExtraTreesRegressor,
                                    ExtremeGradientBoostingRegressor,
                                    GradientBoostingRegressor,
                                    LightGradientBoostingRegressor,
                                    RandomForestRegressor)
+from MetReg.models.ml.svr import LinearSVRegressor, SVRegressor
+from MetReg.models.ml.mlp import MLPRegressor
+from MetReg.models.ml.linear import (BaseLinearRegressor, ElasticRegressor,
+                                     ExpandLinearRegressor, LassoRegressor,
+                                     RidgeRegressor)
+from MetReg.models.ml.knn import KNNRegressor
+from MetReg.models.ml.gp import GaussianProcessRegressor
+from MetReg.models.ml.elm import ExtremeLearningRegressor
+from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
+import os
+import pickle
 
-from MetReg.models.dl.rnn import BaseRNNRegressor
+import os
+
+os.environ['TP_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 class ModelInterface():
@@ -110,30 +112,10 @@ class ModelInterface():
 
     def _get_rnn_mdl(self, mdl_name):
         rnn_hash = {
-            'base': BaseRNNRegressor()
+            'base': BaseRNNRegressor(),
+            'lstm': LSTMRegressor()
         }
         return rnn_hash[mdl_name]
-
-
-class model_benchmarker:
-
-    def __init__(self,
-                 mdl,
-                 X,
-                 y=None):
-        self.mdl = mdl
-        self.X = X
-        self.y = y
-
-    def __call__(self):
-        y_pred = self.mdl.predict(self.X)
-        return _benchmark_array(self.X, y_pred)()
-
-
-class model_loader:
-    def __init__(self, save_path): pass
-
-    def __call__(self): pass
 
 
 class model_saver:
