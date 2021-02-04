@@ -1,4 +1,4 @@
-from MetReg.models.dl.rnn import BaseRNNRegressor, LSTMRegressor
+from MetReg.models.dl.rnn import BaseRNNRegressor, LSTMRegressor, BiLSTMRegressor, GRURegressor
 from MetReg.models.ml.tree import (AdaptiveBoostingRegressor,
                                    BaseTreeRegressor, ExtraTreesRegressor,
                                    ExtremeGradientBoostingRegressor,
@@ -17,7 +17,6 @@ from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
 import os
 import pickle
 
-import os
 
 os.environ['TP_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -113,7 +112,9 @@ class ModelInterface():
     def _get_rnn_mdl(self, mdl_name):
         rnn_hash = {
             'base': BaseRNNRegressor(),
-            'lstm': LSTMRegressor()
+            'lstm': LSTMRegressor(),
+            'gru': GRURegressor(),
+            'bilstm': BiLSTMRegressor(),
         }
         return rnn_hash[mdl_name]
 
