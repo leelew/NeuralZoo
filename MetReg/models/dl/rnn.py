@@ -45,44 +45,31 @@ class LSTMRegressor(BaseRNNRegressor):
         return self.dense(x)
 
 
-class rnn:
+class GRURegressor(BaseRNNRegressor):
 
-    def __init__(self): pass
+    def __init__(self):
+        super().__init__()
 
-    def __call__(self):
+        self.gru = layers.GRU(units=64)
+        self.dense = layers.Dense(1)
 
-        mdl = tf.keras.models.Sequential()
-        mdl.add(tf.keras.layers.RNN(units=64, input_shape=(10, 3)))
-        mdl.add(tf.keras.layers.Dense(1))
-        mdl.summary()
+    def call(self, inputs):
 
-        return mdl
-
-
-class gru:
-
-    def __init__(self): pass
-
-    def __call__(self):
-
-        mdl = tf.keras.models.Sequential()
-        mdl.add(tf.keras.layers.GRU(units=64, input_shape=(10, 3)))
-        mdl.add(tf.keras.layers.Dense(1))
-        mdl.summary()
-
-        return mdl
+        x = self.gru(inputs)
+        return self.dense(x)
 
 
-class bilstm:
+class BiLSTMRegressor(BaseRNNRegressor):
 
-    def __init__(self): pass
+    def __init__(self):
+        super().__init__()
 
-    def __call__(self):
+        self.bilstm = layers.Bidirectional(
+            layers.LSTM(units=64))
 
-        mdl = tf.keras.models.Sequential()
-        mdl.add(tf.keras.layers.Bidirectional(
-            tf.keras.layers.LSTM(units=64, input_shape=(10, 3))))
-        mdl.add(tf.keras.layers.Dense(1))
-        mdl.summary()
+        self.dense = layers.Dense(1)
 
-        return mdl
+    def call(self, inputs):
+
+        x = self.bilstm(inputs)
+        return self.dense(x)
