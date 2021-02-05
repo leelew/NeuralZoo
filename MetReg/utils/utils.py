@@ -18,6 +18,17 @@ from sklearn.metrics import (explained_variance_score, mean_absolute_error,
                              mean_squared_error, median_absolute_error,
                              r2_score)
 
+def print_log():
+    """Basic info"""
+    print('welcome to deep learning world \n')
+    print('            _____     __  __     __     _     _______     _______  ')
+    print('           / ____|   |  \/  |   | \ \  | |   |  _____|   |___ ___| ')
+    print('           \  \      | \  / |   |  \ \ | |   | |_____       | |    ')
+    print('            \  \     | |\/| |   | | \ \| |   |  _____|      | |    ')
+    print('           __\  \    | |  | |   | |  \ \ |   | |_____       | |    ')
+    print('          |_____/    |_|  |_|   |_|   \__|   |_______|      |_|    ')
+    print('\n[SMNET][INFO] @author: Lu Li')
+    print('[SMNET][INFO] @mail: lilu35@mail2.sysu.edu.cn \n')
 
 
 def save2pickle(data, out_path, out_file):

@@ -16,7 +16,7 @@ from sklearn.metrics import (explained_variance_score, max_error,
                              mean_squared_log_error, mean_tweedie_deviance,
                              median_absolute_error, r2_score)
 
-
+from sklearn.preprocessing import MinMaxScaler
 
 def mae(y_true, y_pred):
     output_errors = np.average(np.abs(y_pred - y_true), axis=0)
@@ -37,7 +37,19 @@ def rmse(y_true, y_pred):
     return rmse_
 
 
-
+def inverse(pred, true):
+    """Inverse prediction array with true array"""
+    # scaler
+    scaler = MinMaxScaler()
+    # inverse
+    for i in range(true.shape[1]):
+        for j in range(true.shape[2]):
+            if (np.isnan(true[:, i, j, :]).any()) or (np.isnan(pred[:, i, j, :]).any()):
+                print('This pixel ')
+            else:
+                scaler.fit_transform(true[:, i, j, :])
+                pred[:, i, j, :] = scaler.inverse_transform(pred[:, i, j, :])
+    return pred
 
 
 
