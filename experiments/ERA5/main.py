@@ -40,25 +40,28 @@ def main(mdl_name='ml.tree.lightgbm',
     NLAT, NLON = mask.shape
 
     # saved model
-    saved_mdl = [[] for i in range(NLAT)]
-
 
     if mdl_name.split('.')[0] == 'sdl':
         mdl = ModelInterface(mdl_name=mdl_name).get_model()
 
         mdl.compile(optimizer='adam', loss='mse')
-        mdl.fit(X_train, y_train, batch_size=32, epoch=50)
+        mdl.fit(X_train, y_train[:, 0, :, :, :], batch_size=32, epochs=50)
         y_predict = mdl.predict(X_valid)
-        
+
         for i in range(NLAT):
             for j in range(NLON):
                 if not np.isnan(mask[i, j]):
-                    print(r2_score(y_valid[:, 0, i, j, 0], y_predict[:,i,j]))
+                    print(r2_score(y_valid[:, 0, i, j, 0], y_predict[:, i, j]))
+        saved_mdl = mdl
 
+    ModelSaver(saved_mdl, mdl_name=mdl_name,
+               dir_save='/hard/lilu/saved_models/'+mdl_name,
+               name_save='/saved_model_' + str(task))()
 
-
-
+    """
     a = time.time()
+    saved_mdl = [[] for i in range(NLAT)]
+
     for i in range(NLAT):
         for j in range(NLON):
             if not np.isnan(mask[i, j]):
@@ -84,7 +87,7 @@ def main(mdl_name='ml.tree.lightgbm',
 
                     y_predict = mdl.predict(X_valid[:, :, i, j, :])
                     print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
-                    
+
                 else:
                     print('manual train class')
 
@@ -94,10 +97,10 @@ def main(mdl_name='ml.tree.lightgbm',
     b = time.time()
     print(b-a)
 
-    ModelSaver(saved_mdl,
+    ModelSaver(saved_mdl, mdl_name=mdl_name,
                dir_save='/hard/lilu/saved_models/'+mdl_name,
-               name_save='/saved_model_' + str(task) + '.pickle')()
-
+               name_save='/saved_model_' + str(task))()
+    """
 
 
 if __name__ == "__main__":
@@ -106,11 +109,9 @@ if __name__ == "__main__":
     parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
     config = parse.parse_args()
 
-    main(mdl_name=config.mdl_name, task=0)
-    
-    """
+    #main(mdl_name=config.mdl_name, task=0)
+
     for task in range(200):
         print('task = {}'.format(task))
 
         main(mdl_name=config.mdl_name, task=task)
-    """

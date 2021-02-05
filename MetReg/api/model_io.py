@@ -2,6 +2,8 @@ import os
 import pickle
 
 from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
+from MetReg.models.dl.convrnn import (AttConvLSTMRegressor,
+                                      BaseConvLSTMRegressor, trajGRURegressor)
 from MetReg.models.dl.rnn import (BaseRNNRegressor, BiLSTMRegressor,
                                   GRURegressor, LSTMRegressor)
 from MetReg.models.ml.elm import ExtremeLearningRegressor
@@ -18,9 +20,8 @@ from MetReg.models.ml.tree import (AdaptiveBoostingRegressor,
                                    GradientBoostingRegressor,
                                    LightGradientBoostingRegressor,
                                    RandomForestRegressor)
-from MetReg.models.dl.convlstm import BaseConvLSTMRegressor
 
-os.environ['TP_CPP_MIN_LOG_LEVEL'] = '3' #avoid logging print
+os.environ['TP_CPP_MIN_LOG_LEVEL'] = '3'  # avoid logging print
 
 
 class ModelInterface():
@@ -47,13 +48,17 @@ class ModelInterface():
             mdl = self._get_mlp_mdl(self.mdl_name)
         elif 'elm' in self.mdl_type.lower():
             mdl = self._get_elm_mdl(self.mdl_name)
-        elif 'knn' in self.mdl_type.lower():
+        elif 'knn' == self.mdl_type.lower():
             mdl = self._get_knn_mdl(self.mdl_name)
 
-        elif 'rnn' in self.mdl_type.lower():
+        elif 'rnn' == self.mdl_type.lower():
             mdl = self._get_rnn_mdl(self.mdl_name)
-        elif 'convrnn' in self.mdl_type.lower():
+        elif 'convrnn' == self.mdl_type.lower():
             mdl = self._get_convrnn_mdl(self.mdl_name)
+        elif 'cnn' == self.mdl_type.lower():
+            mdl = self._get_cnn_mdl(self.mdl_name)
+        elif 'dnn' == self.mdl_type.lower():
+            mdl = self._get_dnn_mdl(self.mdl_name)
 
         else:
             raise NameError("Hasn't support this model!")
@@ -122,21 +127,27 @@ class ModelInterface():
 
     def _get_convrnn_mdl(self, mdl_name):
         convrnn_hash = {
-            'lstm': BaseConvLSTMRegressor()
+            'trajgru': trajGRURegressor(),
+            'convlstm': BaseConvLSTMRegressor(),
+            'attconvlstm': AttConvLSTMRegressor(),
         }
         return convrnn_hash[mdl_name]
 
 
 class ModelSaver:
 
-    def __init__(self, mdl, dir_save, name_save):
+    def __init__(self, mdl, mdl_name, dir_save, name_save):
         self.mdl = mdl
         self.dir_save = dir_save
         self.name_save = name_save
+        self.mdl_name = mdl_name
 
     def __call__(self):
         if not os.path.isdir(self.dir_save):
             os.mkdir(self.dir_save)
 
-        pickle.dump(self.mdl, open(
-            self.dir_save+self.name_save, 'wb'))
+        if self.mdl_name.split('.')[0] == 'ml':
+            pickle.dump(self.mdl, open(
+                self.dir_save + self.name_save+'.pickle', 'wb'))
+        else:
+            self.mdl.save(self.dir_save + self.name_save)

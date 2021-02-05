@@ -1,21 +1,13 @@
-"""
-/*******************************************
-** This is a file created by CNALeon007
-** Name: TrajGRU
-** Date: 8/21/19
-** BSD license
-********************************************/
-"""
-
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-import numpy as np
 
 # S: seq_len
 # B: batch
 # H: height
 # W: width
 # C: filter
+
 
 def get_pixel_value(img, x, y):
     """
@@ -119,7 +111,7 @@ def wrap(img, x, y):
     return out
 
 
-class BaseConvRNN(keras.Model):
+class BaseConvRNN(keras.layers.Layer):
     def __init__(self, num_filter, b_h_w,
                  h2h_kernel=(3, 3), h2h_dilate=(1, 1),
                  i2h_kernel=(3, 3), i2h_stride=(1, 1),
@@ -140,15 +132,18 @@ class BaseConvRNN(keras.Model):
         self._i2h_dilate = i2h_dilate
         self._act_type = act_type
         assert len(b_h_w) == 3
-        i2h_dilate_ksize_h = 1 + (self._i2h_kernel[0] - 1) * self._i2h_dilate[0]
-        i2h_dilate_ksize_w = 1 + (self._i2h_kernel[1] - 1) * self._i2h_dilate[1]
+        i2h_dilate_ksize_h = 1 + \
+            (self._i2h_kernel[0] - 1) * self._i2h_dilate[0]
+        i2h_dilate_ksize_w = 1 + \
+            (self._i2h_kernel[1] - 1) * self._i2h_dilate[1]
 
         self._batch_size, self._height, self._width = b_h_w
 
         self._state_height = (self._height + 2 * self._i2h_pad[0] - i2h_dilate_ksize_h) \
-                             // self._i2h_stride[0] + 1
+            // self._i2h_stride[0] + 1
         self._state_width = (self._width + 2 * self._i2h_pad[1] - i2h_dilate_ksize_w) \
-                            // self._i2h_stride[1] + 1
+            // self._i2h_stride[1] + 1
+
 
 class TrajGRU(BaseConvRNN):
     def __init__(self, num_filter, b_h_w, zoneout=0.0, L=5,
@@ -231,11 +226,13 @@ class TrajGRU(BaseConvRNN):
         else:
             i2f_conv1 = None
         h2f_conv1 = self.h2f_conv1(states)
-        f_conv1 = i2f_conv1 + h2f_conv1 if i2f_conv1 is not None else h2f_conv1  # 这里看，inputs的H，W和state的H，W应该一样
+        # 这里看，inputs的H，W和state的H，W应该一样
+        f_conv1 = i2f_conv1 + h2f_conv1 if i2f_conv1 is not None else h2f_conv1
         f_conv1 = self._act_type(f_conv1, alpha=0.2)
 
         flows = self.flows_conv(f_conv1)  # size<B, H, W, 2*L>
-        flows = tf.split(flows, num_or_size_splits=self._L, axis=3)  # 第1维分割，2个一组 size<L, B, H, W, 2>
+        # 第1维分割，2个一组 size<L, B, H, W, 2>
+        flows = tf.split(flows, num_or_size_splits=self._L, axis=3)
         return flows
 
     def call(self, inputs=None, states=None):
@@ -279,16 +276,20 @@ class TrajGRU(BaseConvRNN):
             wrapped_data = []
             for j in range(len(flows)):
                 flow = flows[j]
-                wrapped_data.append(wrap(prev_h, -flow[:, :, :, 0], -flow[:, :, :, 1]))
+                wrapped_data.append(
+                    wrap(prev_h, -flow[:, :, :, 0], -flow[:, :, :, 1]))
 
             wrapped_data = tf.concat(wrapped_data, axis=3)
             h2h = self.ret(wrapped_data)
             h2h_slice = tf.split(h2h, 3, axis=3)
 
             if i2h_slice is not None:
-                reset_gate = tf.math.sigmoid(i2h_slice[0][i, ...] + h2h_slice[0])
-                update_gate = tf.math.sigmoid(i2h_slice[1][i, ...] + h2h_slice[1])
-                new_mem = self._act_type(i2h_slice[2][i, ...] + reset_gate * h2h_slice[2], alpha=0.2)
+                reset_gate = tf.math.sigmoid(
+                    i2h_slice[0][i, ...] + h2h_slice[0])
+                update_gate = tf.math.sigmoid(
+                    i2h_slice[1][i, ...] + h2h_slice[1])
+                new_mem = self._act_type(
+                    i2h_slice[2][i, ...] + reset_gate * h2h_slice[2], alpha=0.2)
             else:
                 reset_gate = tf.math.sigmoid(h2h_slice[0])
                 update_gate = tf.math.sigmoid(h2h_slice[1])
