@@ -42,6 +42,22 @@ def main(mdl_name='ml.tree.lightgbm',
     # saved model
     saved_mdl = [[] for i in range(NLAT)]
 
+
+    if mdl_name.split('.')[0] == 'sdl':
+        mdl = ModelInterface(mdl_name=mdl_name).get_model()
+
+        mdl.compile(optimizer='adam', loss='mse')
+        mdl.fit(X_train, y_train, batch_size=32, epoch=50)
+        y_predict = mdl.predict(X_valid)
+        
+        for i in range(NLAT):
+            for j in range(NLON):
+                if not np.isnan(mask[i, j]):
+                    print(r2_score(y_valid[:, 0, i, j, 0], y_predict[:,i,j]))
+
+
+
+
     a = time.time()
     for i in range(NLAT):
         for j in range(NLON):
@@ -68,6 +84,7 @@ def main(mdl_name='ml.tree.lightgbm',
 
                     y_predict = mdl.predict(X_valid[:, :, i, j, :])
                     print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
+                    
                 else:
                     print('manual train class')
 
