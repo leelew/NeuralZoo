@@ -1,12 +1,12 @@
 import argparse
 import pickle
-from six.moves import cPickle
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
-from MetReg.api.model_io import ModelInterface, model_saver
+from MetReg.api.model_io import ModelInterface, ModelSaver
+from six.moves import cPickle
 from sklearn.metrics import r2_score
-import json
-import time
 
 
 def _read_inputs(task,
@@ -57,8 +57,7 @@ def main(mdl_name='ml.tree.lightgbm',
 
                     y_predict = mdl.predict(
                         X_valid[:, :, i, j, :].reshape(X_valid.shape[0], -1))
-                    # print(y_predict)
-                    #print(y_valid[:, 0, i, j, 0])
+
                     print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
 
                 elif mdl_name.split('.')[0] == 'dl':
@@ -77,13 +76,11 @@ def main(mdl_name='ml.tree.lightgbm',
                 saved_mdl[i].append(None)
     b = time.time()
     print(b-a)
-    try:
-        model_saver(saved_mdl,
-                    dir_save='/hard/lilu/saved_models/'+mdl_name,
-                    name_save='/saved_model_' + str(task) + '.pickle')()
-    except:
-        from hpelm import ELM
-        # ELM().save
+
+    ModelSaver(saved_mdl,
+               dir_save='/hard/lilu/saved_models/'+mdl_name,
+               name_save='/saved_model_' + str(task) + '.pickle')()
+
 
 
 if __name__ == "__main__":
@@ -93,6 +90,7 @@ if __name__ == "__main__":
     config = parse.parse_args()
 
     main(mdl_name=config.mdl_name, task=0)
+    
     """
     for task in range(200):
         print('task = {}'.format(task))

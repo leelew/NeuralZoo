@@ -9,24 +9,33 @@
 # -----------------------------------------------------------------------------
 
 
+import numpy as np
 from sklearn.metrics import (explained_variance_score, max_error,
                              mean_absolute_error, mean_gamma_deviance,
                              mean_poisson_deviance, mean_squared_error,
                              mean_squared_log_error, mean_tweedie_deviance,
                              median_absolute_error, r2_score)
-import numpy as np
 
-def nse(y_true, y_predict):
-    """Nash-Sutcliffe Efficiency (NSE).
 
-    calc details:
-    """
-    nse_ = 1-(np.sum((y_true-y_predict)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
+
+def mae(y_true, y_pred):
+    output_errors = np.average(np.abs(y_pred - y_true), axis=0)
+    return np.average(output_errors)
+
+def mse(y_true, y_pred):
+    output_errors = np.average((y_true - y_pred) ** 2, axis=0)
+    return np.average(output_errors)
+
+def nse(y_true, y_pred):
+    """Nash-Sutcliffe Efficiency (NSE)."""
+    nse_ = 1-(
+        np.sum((y_true-y_pred)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
     return nse_
 
-def rmse(y_true, y_predict):
-    rmse_ = np.sqrt(np.mean((y_true-y_predict)**2, axis=0))
+def rmse(y_true, y_pred):
+    rmse_ = np.sqrt(np.mean((y_true-y_pred)**2, axis=0))
     return rmse_
+
 
 
 
