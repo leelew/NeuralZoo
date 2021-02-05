@@ -1,7 +1,6 @@
 
 import numpy as np
 import tensorflow as tf
-from models.ConvRNN.TrajGRU import TrajGRU
 from tensorflow import keras
 from tensorflow.keras import Model, Sequential
 from tensorflow.keras.activations import sigmoid, tanh
