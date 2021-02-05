@@ -2,7 +2,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits import Basemap
 
-def plot_countourf(inputs, lat, lon, output_path):
+
+def _get_grid_attribute():
+    pass
+
+
+def plot_countourf(
+    inputs, 
+    lat, 
+    lon, 
+    output_path):
     """plot countourf using basemap according lat, lon."""
     plt.figure()
 
@@ -12,8 +21,11 @@ def plot_countourf(inputs, lat, lon, output_path):
 
     sc = m.pcolormesh(x, y, inputs)
 
-    plt.colorbar()
-    plt.savefig('1.pdf')
+    sc.set_edgecolor('face')
+
+    m.colorbar(sc, location='bottom')
+    plt.savefig(output_path)
+    #plt.text()
     
     
 def plot_scatter():

@@ -16,6 +16,22 @@ from sklearn.metrics import (explained_variance_score, max_error,
                              median_absolute_error, r2_score)
 import numpy as np
 
+def nse(y_true, y_predict):
+    """Nash-Sutcliffe Efficiency (NSE).
+
+    calc details:
+    """
+    nse_ = 1-(np.sum((y_true-y_predict)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
+    return nse_
+
+def rmse(y_true, y_predict):
+    rmse_ = np.sqrt(np.mean((y_true-y_predict)**2, axis=0))
+    return rmse_
+
+
+
+
+
 class Metrics():
 
     def __init__(self, validate, forecast, metrics:list=None):
