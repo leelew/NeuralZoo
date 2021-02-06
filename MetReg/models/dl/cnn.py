@@ -7,12 +7,13 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, Dense
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import Model, layerss
+from tensorflow.keras import Model, layers
 
 
 class BaseCNNRegressor(Model):
 
     def __init__(self):
+        super().__init__()
         self.cnn = layers.Conv2D(
             filters=16,
             kernel_size=(3, 3),
