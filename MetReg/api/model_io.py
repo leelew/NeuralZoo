@@ -2,6 +2,7 @@ import os
 import pickle
 
 from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
+from MetReg.models.dl.cnn import BaseCNNRegressor
 from MetReg.models.dl.convrnn import (AttConvLSTMRegressor,
                                       BaseConvLSTMRegressor, trajGRURegressor)
 from MetReg.models.dl.rnn import (BaseRNNRegressor, BiLSTMRegressor,
@@ -124,6 +125,12 @@ class ModelInterface():
             'bilstm': BiLSTMRegressor(),
         }
         return rnn_hash[mdl_name]
+
+    def _get_cnn_mdl(self, mdl_name):
+        cnn_hash = {
+            'base': BaseCNNRegressor(),
+        }
+        return cnn_hash[mdl_name]
 
     def _get_convrnn_mdl(self, mdl_name):
         convrnn_hash = {

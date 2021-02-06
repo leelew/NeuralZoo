@@ -39,13 +39,15 @@ def main(mdl_name='ml.tree.lightgbm',
     # get shape
     NLAT, NLON = mask.shape
 
+    _, T, H, W, F = X_train.shape
     # saved model
 
     if mdl_name.split('.')[0] == 'sdl':
         mdl = ModelInterface(mdl_name=mdl_name).get_model()
 
         mdl.compile(optimizer='adam', loss='mse')
-        mdl.fit(X_train, y_train[:, 0, :, :, :], batch_size=32, epochs=50)
+        mdl.fit(X_train.reshape(-1, H, W, T*F),
+                y_train[:, 0, :, :, :], batch_size=32, epochs=50)
         y_predict = mdl.predict(X_valid)
 
         for i in range(NLAT):

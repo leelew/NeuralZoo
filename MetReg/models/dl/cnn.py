@@ -7,6 +7,22 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, Dense
 from tensorflow.keras.models import Sequential
+from tensorflow.keras import Model
+
+
+class BaseCNNRegressor(Model):
+
+    def __init__(self):
+        self.cnn = layers.Conv2D(
+            filters=16,
+            kernel_size=(3, 3),
+            activation='tanh',
+            padding='same')
+        self.dense = layers.Dense(1)
+
+    def call(self, inputs):
+        x = self.cnn(inputs)
+        return self.dense(x)
 
 
 class vanilla():
@@ -24,8 +40,8 @@ class vanilla():
     def vanilla(self):
 
         model = Sequential()
-        model.add(Conv2D(filters=16, kernel_size=(3,3), activation='tanh', 
-                         padding='same', input_shape=(8,8,30)))
+        model.add(Conv2D(filters=16, kernel_size=(3, 3), activation='tanh',
+                         padding='same', input_shape=(8, 8, 30)))
 
         model.add(Dense(1, activation='tanh'))
         model.summary()
