@@ -15,8 +15,13 @@ from sklearn.metrics import (explained_variance_score, max_error,
                              mean_poisson_deviance, mean_squared_error,
                              mean_squared_log_error, mean_tweedie_deviance,
                              median_absolute_error, r2_score)
-
 from sklearn.preprocessing import MinMaxScaler
+
+
+
+
+def r2(y_true, y_pred):
+    return r2_score(y_true, y_pred)
 
 def mae(y_true, y_pred):
     output_errors = np.average(np.abs(y_pred - y_true), axis=0)
@@ -37,6 +42,11 @@ def rmse(y_true, y_pred):
     return rmse_
 
 
+
+
+
+
+
 def inverse(pred, true):
     """Inverse prediction array with true array"""
     # scaler
@@ -50,6 +60,12 @@ def inverse(pred, true):
                 scaler.fit_transform(true[:, i, j, :])
                 pred[:, i, j, :] = scaler.inverse_transform(pred[:, i, j, :])
     return pred
+
+def annual_cycle():
+    pass
+
+def spatial_difference():
+    pass
 
 
 

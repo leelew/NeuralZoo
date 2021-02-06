@@ -1,3 +1,54 @@
+from tensorflow.keras import layers, Model
+
+
+
+class Encoder(Model):
+
+    def __init__(self):
+        super().__init__()
+
+        self.dense1 = layers.Dense(128, activation='tanh')
+        self.dense2 = layers.Dense(64, activation='tanh')
+        self.dense3 = layers.Dense(32, activation='tanh')
+        self.dense4 = layers.Dense(2, activation='sigmoid')
+
+    def call(self, X, training=False):
+        out = self.dense1(X)
+        out = self.dense2(out)
+        out = self.dense3(out)
+        out = self.dense4(out)
+        return out
+
+class Decoder(Model):
+
+    def __init__(self):
+        super().__init__()
+
+        self.dense1 = layers.Dense(16, activation='tanh')
+        self.dense2 = layers.Dense(64, activation='tanh')
+        self.dense3 = layers.Dense(128, activation='tanh')
+        self.dense4 = layers.Dense(784, activation='sigmoid')
+
+    def call(self, X, training=False):
+        out = self.dense1(X)
+        out = self.dense2(out)
+        out = self.dense3(out)
+        out = self.dense4(out)
+        return out
+
+
+class Autoencoder(Model):
+
+    def __init__(self):
+        super(Autoencoder, self).__init__()
+        self.encoder = Encoder()
+        self.decoder = Decoder()
+
+    def call(self, x, training=False):
+        out = self.encoder(x, training)
+        out = self.decoder(out, training)
+        return out
+
 
 class ED_ConvLSTM(tf.keras.layers.Layer):
     """encoder-decoder ConvLSTM"""
