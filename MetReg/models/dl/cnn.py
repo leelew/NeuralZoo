@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, Dense
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import Model
+from tensorflow.keras import Model, layerss
 
 
 class BaseCNNRegressor(Model):
