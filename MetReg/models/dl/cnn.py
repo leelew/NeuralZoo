@@ -2,12 +2,11 @@ import os
 import sys
 import time
 
-import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras import Model, layers
 from tensorflow.keras.layers import Conv2D, Dense
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import Model, layers
 
 
 class BaseCNNRegressor(Model):
@@ -26,6 +25,37 @@ class BaseCNNRegressor(Model):
         return self.dense(x)
 
 
+class LeNet(Model):
+    """default CNN, created by Yann LeCun.
+        https://www.mitpressjournals.org/doi/abs/10.1162/neco.1989.1.4.541
+    """
+
+    def __init__(self):
+        self.cnn1 = layers.Conv2D(
+            filters=6,
+            kernel_size=5,
+            activation='sigmoid',)
+        self.avgpool1 = layers.AvgPool2D(pool_size=2, strides=2)
+
+        self.cnn2 = layers.Conv2D(
+            filters=16, kernel_size=5, activation='sigmoid')
+        self.avgpool2 = layers.AvgPool2D(pool_size=2, strides=2)
+        self.flat = layers.Flatten()
+        self.dense1 = layers.Dense(120, activation='sigmoid')
+        self.dense2 = layers.Dense(84, activation='sigmoid')
+        self.dense3 = layers.Dense(10, activation='sigmoid')
+
+    def call(self, inputs):
+        x = self.cnn1(inputs)
+        x = self.avgpool1(x)
+        x = self.cnn2(x)
+        x = self.avgpool2(x)
+        x = self.flat(x)
+        x = self.dense1(x)
+        x = self.dense2(x)
+        return self.dense3(x)
+
+
 class vanilla():
     """implement of vanilla Convolutional Neural Network.
 
@@ -37,37 +67,6 @@ class vanilla():
 
     def __init__(self):
         pass
-
-    def vanilla(self):
-
-        model = Sequential()
-        model.add(Conv2D(filters=16, kernel_size=(3, 3), activation='tanh',
-                         padding='same', input_shape=(8, 8, 30)))
-
-        model.add(Dense(1, activation='tanh'))
-        model.summary()
-
-        return model
-
-    def LeNet(self):
-        """
-        default CNN, created by Yann LeCun.
-        https://www.mitpressjournals.org/doi/abs/10.1162/neco.1989.1.4.541
-        """
-        model = tf.keras.models.Sequential()
-        model.add(tf.keras.layers.Conv2D(filters=6, kernel_size=5,
-                                         activation='sigmoid',
-                                         input_shape=[128, 128, 1]))
-        model.add(tf.keras.layers.AvgPool2D(pool_size=2, strides=2))
-        model.add(tf.keras.layers.Conv2D(
-            filters=16, kernel_size=5, activation='sigmoid'))
-        model.add(tf.keras.layers.AvgPool2D(pool_size=2, strides=2))
-        model.add(tf.keras.layers.Flatten())
-        model.add(tf.keras.layers.Dense(120, activation='sigmoid'))
-        model.add(tf.keras.layers.Dense(84, activation='sigmoid'))
-        model.add(tf.keras.layers.Dense(10, activation='sigmoid'))
-
-        return model
 
     def AlexNet(self):
         """

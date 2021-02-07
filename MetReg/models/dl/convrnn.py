@@ -61,3 +61,12 @@ class trajGRURegressor(Model):
         history_state, prediction = self.trajgru(inputs)
         prediction = self.dense(prediction)
         return prediction
+
+
+class predRNNRegressor(Model):
+
+    def __init__(self):
+        super().__init__()
+
+    def call(self, inputs):
+        pass

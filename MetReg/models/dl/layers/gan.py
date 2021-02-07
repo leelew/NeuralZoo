@@ -32,6 +32,7 @@ class GAN_ConvLSTM():
     This class creates a general advertisal network that using ConvLSTM as
     generator and simple NN as discriminator.
     """
+
     def __init__(self, epochs=20):
         if isinstance(epochs, float):
             epochs = int(epochs)
@@ -52,7 +53,7 @@ class GAN_ConvLSTM():
                        padding='same',
                        activation='relu',
                        input_shape=(10, 8, 8, 3)))
-        #mdl.add(BatchNormalization())
+        # mdl.add(BatchNormalization())
 
         mdl.add(Dense(units=1))
         mdl.summary()
@@ -63,11 +64,9 @@ class GAN_ConvLSTM():
 
         mdl = Sequential()
 
-        
         mdl.add(Flatten())
         mdl.add(Dense(units=1, activation='sigmoid'))
-        
-        
+
         """
         mdl.add(
             Conv2D(filters=16,
@@ -88,8 +87,8 @@ class GAN_ConvLSTM():
         """
         G_mse_loss = MeanSquaredError()(y_truth, G_pred)
         G_bce_loss = BinaryCrossentropy()(tf.zeros_like(D_pred), D_pred)
-        #print(tf.print(G_mse_loss))
-        #print(tf.print(G_bce_loss))
+        # print(tf.print(G_mse_loss))
+        # print(tf.print(G_bce_loss))
         return G_mse_loss - 0.0003*G_bce_loss
 
     @staticmethod

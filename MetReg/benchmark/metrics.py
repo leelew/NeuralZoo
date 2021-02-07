@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-#                                Evaluate module                              # 
+#                                Evaluate module                              #
 # -----------------------------------------------------------------------------
 # author: Lu Li                                                               #
 # mail: lilu35@mail2.sysu.edu.cn                                              #
@@ -8,7 +8,7 @@
 # org/10.1029/2018MS001354), including sklearn based metrics, unbiased metric #
 # -----------------------------------------------------------------------------
 
-
+import math
 import numpy as np
 from sklearn.metrics import (explained_variance_score, max_error,
                              mean_absolute_error, mean_gamma_deviance,
@@ -18,18 +18,48 @@ from sklearn.metrics import (explained_variance_score, max_error,
 from sklearn.preprocessing import MinMaxScaler
 
 
+def bias(y_true, y_pred):
+    """Bias of mean temporal state."""
+    return np.mean(y_pred) - np.mean(y_true)
+
+
+def crms(X):
+    """Centralized RMS."""
+    return np.sqrt(np.sum((X-np.mean(X))**2, axis=0))
+
+
+def score_bias(y_true, y_pred):
+    """bias score on 1 grid."""
+    relative_bias = np.abs(bias(y_true, y_pred))/crms(y_true)
+    score_bias = math.exp(-relative_bias)
+    return score_bias
+
+
+def rmse(y_true, y_pred):
+    return np.sqrt(np.mean((y_true-y_pred)**2, axis=0))
+
+
+def crmse(y_true, y_pred):
+    pass
+
+
+def score_rmse(y_true, y_pred):
+    pass
 
 
 def r2(y_true, y_pred):
     return r2_score(y_true, y_pred)
 
+
 def mae(y_true, y_pred):
     output_errors = np.average(np.abs(y_pred - y_true), axis=0)
     return np.average(output_errors)
 
+
 def mse(y_true, y_pred):
     output_errors = np.average((y_true - y_pred) ** 2, axis=0)
     return np.average(output_errors)
+
 
 def nse(y_true, y_pred):
     """Nash-Sutcliffe Efficiency (NSE)."""
@@ -37,14 +67,10 @@ def nse(y_true, y_pred):
         np.sum((y_true-y_pred)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
     return nse_
 
+
 def rmse(y_true, y_pred):
     rmse_ = np.sqrt(np.mean((y_true-y_pred)**2, axis=0))
     return rmse_
-
-
-
-
-
 
 
 def inverse(pred, true):
@@ -61,20 +87,18 @@ def inverse(pred, true):
                 pred[:, i, j, :] = scaler.inverse_transform(pred[:, i, j, :])
     return pred
 
+
 def annual_cycle():
     pass
+
 
 def spatial_difference():
     pass
 
 
-
-
-
-
 class Metrics():
 
-    def __init__(self, validate, forecast, metrics:list=None):
+    def __init__(self, validate, forecast, metrics: list = None):
 
         if metrics is None:
             self.metrics = True
@@ -86,8 +110,7 @@ class Metrics():
     def _get_data_attr(self, validate):
         self.T, self.H, self.W = validate.shape
 
-    def get_sklearn_metrics(self, validate,forecast):
-
+    def get_sklearn_metrics(self, validate, forecast):
         """get regression metrics from sklearn API.
 
         Args:
@@ -100,27 +123,25 @@ class Metrics():
             metrics (dict):
         """
         metrics = {}
-        
+
         return metrics
-    
+
     @staticmethod
     def _print_avg_metrics(metrics):
 
         for metric_name, metric in metrics.items():
             print('{} is {}'.format(metric_name, np.nanmean(metric)))
 
-
     @staticmethod
     def get_unbiased_metrics(forcast, validate):
         pass
-    
 
     def get_criterion_metrics(self):
         """aic, aicc, bic, mallows cp
         """
         pass
 
-    def get_importance_metrics(self, reg,x_train):
+    def get_importance_metrics(self, reg, x_train):
         """
         """
         # generate importance array
