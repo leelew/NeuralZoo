@@ -11,6 +11,7 @@
 import math
 
 import numpy as np
+from MetReg.base.base_score import BaseScore
 from sklearn.metrics import (explained_variance_score, max_error,
                              mean_absolute_error, mean_gamma_deviance,
                              mean_poisson_deviance, mean_squared_error,
@@ -19,59 +20,127 @@ from sklearn.metrics import (explained_variance_score, max_error,
 from sklearn.preprocessing import MinMaxScaler
 
 
-def bias(y_true, y_pred):
-    """Bias of mean temporal state."""
-    return np.mean(y_pred) - np.mean(y_true)
+class Bias(BaseScore):
+
+    def __init__(self):
+        super().__init__()
+
+    def _cal_bias(self, y_true, y_pred):
+        """Bias of mean temporal state."""
+        return np.mean(y_pred) - np.mean(y_true)
+
+    def _cal_crms(self, X):
+        """Centralized RMS."""
+        return np.sqrt(np.sum((X-np.mean(X))**2, axis=0))
+
+    def _cal_score_bias(self, y_true, y_pred):
+        """bias score on 1 grid."""
+        relative_bias = np.abs(self._cal_bias(
+            y_true, y_pred))/self._cal_crms(y_true)
+        score_bias_ = math.exp(-relative_bias)
+        return score_bias_
+
+    def cal_bias(self, y_true, y_pred):
+        """Mean values over space of bias score.
+
+        Notes:: Only calculate bias on given spatial location leads to
+                consequence that in area where given variable has a small
+                magnitude, simple noise can lead to large relative errors.
+
+                ILAMB give a concept, mass weighting, i.e., when performing
+                the spatial integral to obtain a scaler score, we weight the
+                integral by the period mean value of the true value (also could
+                be reference value for lat-lon grids).
+        """
+        return self.score(func=self._cal_score_bias,
+                          y_true=y_true,
+                          y_pred=y_pred,
+                          mass_weight=True)
+
+    def __repr__(self):
+        return {
+            'short name': 'bias',
+            'long name': 'bias',
+        }
 
 
-def crms(X):
-    """Centralized RMS."""
-    return np.sqrt(np.sum((X-np.mean(X))**2, axis=0))
+class RMSE(Bias):
+
+    def __init__(self):
+        super().__init__()
+
+    def _cal_rmse(self, y_true, y_pred):
+        """RMSE."""
+        return np.sqrt(np.mean((y_true-y_pred)**2, axis=0))
+
+    def _cal_crmse(self, y_true, y_pred):
+        """Centralized RMSE."""
+        return np.sqrt(np.mean(((y_pred-np.mean(y_pred))-(y_true-np.mean(y_true)))**2))
+
+    def _cal_score_rmse(self, y_true, y_pred):
+        relative_rmse = self._cal_crmse(y_true, y_pred)/self._cal_crms(y_true)
+        score_rmse_ = math.exp(-relative_rmse)
+        return score_rmse_
+
+    def cal_rmse(self, y_true, y_pred):
+        """Mean value over space of RMSE score.
+
+        Notes:: score the centralized RMSE to decouple the bias score
+                from the RMSE score, allowing the RMSE score to focus
+                on an orthogonal aspect of model performance.
+        """
+        return self.score(func=self._cal_score_rmse,
+                          y_true=y_true,
+                          y_pred=y_pred,
+                          mass_weight=True)
+
+    def __repr__(self):
+        return {
+            'short name': 'rmse',
+            'long name': 'relatively mean squared error',
+        }
 
 
-def score_bias(y_true, y_pred):
-    """bias score on 1 grid."""
-    relative_bias = np.abs(bias(y_true, y_pred))/crms(y_true)
-    score_bias = math.exp(-relative_bias)
-    return score_bias
+class InterannualVariablity(Bias):
+
+    def __init__(self):
+        super().__init__()
+
+    def _cal_annual_cycle(self, X):
+        return 1  # Todo: cal ac
+
+    def _cal_score_iv(self, y_true, y_pred):
+        relative_iv = (self._cal_annual_cycle(
+            y_pred) - self._cal_annual_cycle(y_true)) / self._cal_annual_cycle(y_true)
+        score_iv_ = math.exp(-relative_iv)
+        return score_iv_
+
+    def cal_iv(self, y_true, y_pred):
+        return self.score(func=self._cal_score_iv,
+                          y_true=y_true,
+                          y_pred=y_pred,
+                          mass_weight=True)
+
+    def __repr__(self):
+        return {
+            'short name': 'iv',
+            'long name': 'interannual variability',
+        }
 
 
-def score_space_bias(y_true, y_pred):
-    """Mean values over space of bias score.
+class SpatialDist(Bias):
 
-    Args:
-        y_true, y_pred (nd.array): 
-            shape of (timesteps, height, width)
+    def __init__(self):
+        super().__init__()
 
-    Notes:: Only calculate bias on given spatial location leads to
-            consequence that in area where given variable has a small 
-            magnitude, simple noise can lead to large relative errors.
-
-            ILAMB give a concept, mass weighting, i.e., when performing
-            the spatial integral to obtain a scaler score, we weight the 
-            integral by the period mean value of the true value (also could
-            be reference value for lat-lon grids).
-    """
-    T, Nlat, Nlon = y_true.shape
-    bias = [score_bias(y_true[:, i, j], y_pred[:, i, j])
-            for i in range(Nlat) for j in range(Nlon)]
-
-    # mass weighting
-    weight = np.mean(y_true, axis=0)
-    score_bias = np.mean(np.multiarray(bias, weight))
-    return score_bias
+    def _cal_score_dist(self, y_true, y_pred):
+        2*(1+self._cal_spatial_correlation())
 
 
-def rmse(y_true, y_pred):
-    return np.sqrt(np.mean((y_true-y_pred)**2, axis=0))
+class PhaseShift(Bias):
 
-
-def crmse(y_true, y_pred):
-    pass
-
-
-def score_rmse(y_true, y_pred):
-    pass
+    def __init__(self):
+        pass
 
 
 def r2(y_true, y_pred):
@@ -95,11 +164,6 @@ def nse(y_true, y_pred):
     return nse_
 
 
-def rmse(y_true, y_pred):
-    rmse_ = np.sqrt(np.mean((y_true-y_pred)**2, axis=0))
-    return rmse_
-
-
 def inverse(pred, true):
     """Inverse prediction array with true array"""
     # scaler
@@ -113,14 +177,6 @@ def inverse(pred, true):
                 scaler.fit_transform(true[:, i, j, :])
                 pred[:, i, j, :] = scaler.inverse_transform(pred[:, i, j, :])
     return pred
-
-
-def annual_cycle():
-    pass
-
-
-def spatial_difference():
-    pass
 
 
 class Metrics():
@@ -144,7 +200,7 @@ class Metrics():
             forecast (np.array):
                 shape of (timestep, height, width)
             validate (np.array):
-                shape of (timestep, height, width) 
+                shape of (timestep, height, width)
 
         Returns:
             metrics (dict):
