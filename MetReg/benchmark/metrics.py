@@ -9,6 +9,7 @@
 # -----------------------------------------------------------------------------
 
 import math
+
 import numpy as np
 from sklearn.metrics import (explained_variance_score, max_error,
                              mean_absolute_error, mean_gamma_deviance,
@@ -32,6 +33,32 @@ def score_bias(y_true, y_pred):
     """bias score on 1 grid."""
     relative_bias = np.abs(bias(y_true, y_pred))/crms(y_true)
     score_bias = math.exp(-relative_bias)
+    return score_bias
+
+
+def score_space_bias(y_true, y_pred):
+    """Mean values over space of bias score.
+
+    Args:
+        y_true, y_pred (nd.array): 
+            shape of (timesteps, height, width)
+
+    Notes:: Only calculate bias on given spatial location leads to
+            consequence that in area where given variable has a small 
+            magnitude, simple noise can lead to large relative errors.
+
+            ILAMB give a concept, mass weighting, i.e., when performing
+            the spatial integral to obtain a scaler score, we weight the 
+            integral by the period mean value of the true value (also could
+            be reference value for lat-lon grids).
+    """
+    T, Nlat, Nlon = y_true.shape
+    bias = [score_bias(y_true[:, i, j], y_pred[:, i, j])
+            for i in range(Nlat) for j in range(Nlon)]
+
+    # mass weighting
+    weight = np.mean(y_true, axis=0)
+    score_bias = np.mean(np.multiarray(bias, weight))
     return score_bias
 
 
