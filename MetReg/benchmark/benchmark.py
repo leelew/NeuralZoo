@@ -1,5 +1,6 @@
 from MetReg.benchmark.metrics import (RMSE, Bias, InterannualVariablity,
-                                      SpatialDist)
+                                      SpatialDist, CriterionScore, PhaseShift,
+                                      RegressionScore)
 
 
 class ScoreBoard():
@@ -16,10 +17,14 @@ class ScoreBoard():
 
     def __init__(self,
                  y_true,
-                 y_pred,):
+                 y_pred,
+                 ):
         pass
 
-    def score(self):
+    def cal_overall_score(self):
+        pass
+
+    def cal_overall_score_1d(self):
         pass
 
     def _benchmark_array(self, y_true, y_pred):

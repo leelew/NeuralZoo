@@ -1,6 +1,95 @@
 import matplotlib.pyplot as plt
+import mpl_toolkits.axisartist.floating_axes as fa
+import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
+from matplotlib.projections import PolarAxes
 from mpl_toolkits import Basemap
+
+
+def plot_taylor_diagram(stdev,
+                        corrcoeff,
+                        refstd,
+                        fig,
+                        colors,
+                        normalize=True):
+    """Plot a taylor diagram
+
+    Args:
+        stddev : numpy.ndarray
+            an array of standard deviations
+        corrcoeff : numpy.ndarray
+            an array of correlation coefficients
+        refstd : float
+            the reference standard deviation
+        fig : matplotlib figure
+            the matplotlib figure
+        colors : array
+            an array of colors for each element of the input arrays
+        normalize : bool, optional
+            disable to skip normalization of the standard deviation
+    """
+    # define transform
+    tr = PolarAxes.PolarTransform()
+
+    # correlation labels
+    rlocs = np.concatenate((np.arange(10)/10., [0.95, 0.99]))
+    tlocs = np.arccos(rlocs)
+    gl1 = GF.FixedLocator(tlocs)
+    tf1 = GF.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+    # standard deviation axis extent
+    if normalize:
+        stddev = stddev/refstd
+        refstd = 1.
+    smin = 0
+    smax = max(2.0, 1.1*stddev.max())
+
+    # add the curvilinear grid
+    ghelper = FA.GridHelperCurveLinear(tr,
+                                       extremes=(0, np.pi/2, smin, smax),
+                                       grid_locator1=gl1,
+                                       tick_formatter1=tf1)
+    ax = FA.FloatingSubplot(fig, 111, grid_helper=ghelper)
+    fig.add_subplot(ax)
+
+    # adjust axes
+    ax.axis["top"].set_axis_direction("bottom")
+    ax.axis["top"].toggle(ticklabels=True, label=True)
+    ax.axis["top"].major_ticklabels.set_axis_direction("top")
+    ax.axis["top"].label.set_axis_direction("top")
+    ax.axis["top"].label.set_text("Correlation")
+    ax.axis["left"].set_axis_direction("bottom")
+    if normalize:
+        ax.axis["left"].label.set_text("Normalized standard deviation")
+    else:
+        ax.axis["left"].label.set_text("Standard deviation")
+    ax.axis["right"].set_axis_direction("top")
+    ax.axis["right"].toggle(ticklabels=True)
+    ax.axis["right"].major_ticklabels.set_axis_direction("left")
+    ax.axis["bottom"].set_visible(False)
+    ax.grid(True)
+
+    ax = ax.get_aux_axes(tr)
+    # Plot data
+    corrcoef = corrcoef.clip(-1, 1)
+    for i in range(len(corrcoef)):
+        ax.plot(np.arccos(corrcoef[i]), stddev[i],
+                'o', color=colors[i], mew=0, ms=8)
+
+    # Add reference point and stddev contour
+    l, = ax.plot([0], refstd, 'k*', ms=12, mew=0)
+    t = np.linspace(0, np.pi/2)
+    r = np.zeros_like(t) + refstd
+    ax.plot(t, r, 'k--')
+
+    # centralized rms contours
+    rs, ts = np.meshgrid(np.linspace(smin, smax),
+                         np.linspace(0, np.pi/2))
+    rms = np.sqrt(refstd**2 + rs**2 - 2*refstd*rs*np.cos(ts))
+    contours = ax.contour(ts, rs, rms, 5, colors='k', alpha=0.4)
+    ax.clabel(contours, fmt='%1.1f')
+
+    return ax
 
 
 def _get_grid_attribute():
@@ -8,10 +97,10 @@ def _get_grid_attribute():
 
 
 def plot_countourf(
-    inputs, 
-    lat, 
-    lon, 
-    output_path):
+        inputs,
+        lat,
+        lon,
+        output_path):
     """plot countourf using basemap according lat, lon."""
     plt.figure()
 
@@ -25,9 +114,9 @@ def plot_countourf(
 
     m.colorbar(sc, location='bottom')
     plt.savefig(output_path)
-    #plt.text()
-    
-    
+    # plt.text()
+
+
 def plot_scatter():
     """plot scatter and fitting line."""
     pass
@@ -36,7 +125,6 @@ def plot_scatter():
 def plot_plot():
     """plot timeseries and show shadow as std."""
     pass
-
 
 
 class Plotting():
