@@ -32,3 +32,9 @@ class BaseScore():
 
     def __repr__(self):
         pass
+
+    @staticmethod
+    def _print_avg_metrics(metrics):
+
+        for metric_name, metric in metrics.items():
+            print('{} is {}'.format(metric_name, np.nanmean(metric)))

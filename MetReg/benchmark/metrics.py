@@ -111,7 +111,8 @@ class InterannualVariablity(Bias):
 
     def _cal_score_iv(self, y_true, y_pred):
         relative_iv = (self._cal_annual_cycle(
-            y_pred) - self._cal_annual_cycle(y_true)) / self._cal_annual_cycle(y_true)
+            y_pred) - self._cal_annual_cycle(y_true)) / \
+            self._cal_annual_cycle(y_true)
         score_iv_ = math.exp(-relative_iv)
         return score_iv_
 
@@ -133,8 +134,27 @@ class SpatialDist(Bias):
     def __init__(self):
         super().__init__()
 
+    def _cal_std(self, X):
+        return np.std(X)
+
+    def _cal_normalized_std(self, y_true, y_pred):
+        return self._cal_std(y_pred)/self._cal_std(y_true)
+
+    def _cal_scorr(self, y_true, y_pred):
+        """Calculate spatial correlation.
+
+        Args:
+            y_true, y_pred (nd.array): shape of (lat,lon)
+        """
+        return np.corrcoef(y_true.reshape(-1,), y_pred.reshape(-1,))[0, 1]
+
     def _cal_score_dist(self, y_true, y_pred):
-        2*(1+self._cal_spatial_correlation())
+        v_ref = np.mean(y_true, axis=0)
+        v_mod = np.mean(y_pred, axis=0)
+        std_ = self._cal_normalized_std(v_ref, v_mod)
+        scorr_ = self._cal_scorr(v_ref, v_mod)
+        score_dist = 2 * (1 + scorr_) / ((std_ + 1 / std_) ** 2)
+        return score_dist
 
 
 class PhaseShift(Bias):
@@ -143,101 +163,41 @@ class PhaseShift(Bias):
         pass
 
 
-def r2(y_true, y_pred):
-    return r2_score(y_true, y_pred)
+class RegressionScore:
+    """All regression scores includes bias, rmse, r2, mae, mse, nse. 
 
+    Notes:: Now only support bias & rmse for ilamb edition, which represents
+            bias and variance. r2 is a non-dimensionalized metrics which 
+            already represent score. mse is nearly the same with rmse. nse
+            need further thinking.
+    """
 
-def mae(y_true, y_pred):
-    output_errors = np.average(np.abs(y_pred - y_true), axis=0)
-    return np.average(output_errors)
-
-
-def mse(y_true, y_pred):
-    output_errors = np.average((y_true - y_pred) ** 2, axis=0)
-    return np.average(output_errors)
-
-
-def nse(y_true, y_pred):
-    """Nash-Sutcliffe Efficiency (NSE)."""
-    nse_ = 1-(
-        np.sum((y_true-y_pred)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
-    return nse_
-
-
-def inverse(pred, true):
-    """Inverse prediction array with true array"""
-    # scaler
-    scaler = MinMaxScaler()
-    # inverse
-    for i in range(true.shape[1]):
-        for j in range(true.shape[2]):
-            if (np.isnan(true[:, i, j, :]).any()) or (np.isnan(pred[:, i, j, :]).any()):
-                print('This pixel ')
-            else:
-                scaler.fit_transform(true[:, i, j, :])
-                pred[:, i, j, :] = scaler.inverse_transform(pred[:, i, j, :])
-    return pred
-
-
-class Metrics():
-
-    def __init__(self, validate, forecast, metrics: list = None):
-
-        if metrics is None:
-            self.metrics = True
-        else:
-            self.metrics = metrics
-
-        self._get_data_attr(validate)
-
-    def _get_data_attr(self, validate):
-        self.T, self.H, self.W = validate.shape
-
-    def get_sklearn_metrics(self, validate, forecast):
-        """get regression metrics from sklearn API.
-
-        Args:
-            forecast (np.array):
-                shape of (timestep, height, width)
-            validate (np.array):
-                shape of (timestep, height, width)
-
-        Returns:
-            metrics (dict):
-        """
-        metrics = {}
-
-        return metrics
-
-    @staticmethod
-    def _print_avg_metrics(metrics):
-
-        for metric_name, metric in metrics.items():
-            print('{} is {}'.format(metric_name, np.nanmean(metric)))
-
-    @staticmethod
-    def get_unbiased_metrics(forcast, validate):
+    def __init__(self):
         pass
 
-    def get_criterion_metrics(self):
-        """aic, aicc, bic, mallows cp
-        """
-        pass
+    def _cal_r2(self, y_true, y_pred):
+        return r2_score(y_true, y_pred)
 
-    def get_importance_metrics(self, reg, x_train):
-        """
-        """
-        # generate importance array
-        try:
-            importance = reg.coef_ * x_train.std(axis=0)
-        except AttributeError:  # for tree regression
-            try:  # only for RANSAC, cuz different code of using coef_
-                importance = reg.estimator_.coef_ * x_train.std(axis=0)
-            except AttributeError:
-                try:
-                    importance = reg.feature_importances_
-                except:
-                    importance = False
-                    print('This is not a linear regression or tree regression')
+    def _cal_mae(self, y_true, y_pred):
+        output_errors = np.average(np.abs(y_pred - y_true), axis=0)
+        return np.average(output_errors)
 
-        return importance
+    def _cal_mse(self, y_true, y_pred):
+        output_errors = np.average((y_true - y_pred) ** 2, axis=0)
+        return np.average(output_errors)
+
+    def _cal_nse(self, y_true, y_pred):
+        """Nash-Sutcliffe Efficiency (NSE)."""
+        nse_ = 1-(
+            np.sum((y_true-y_pred)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
+        return nse_
+
+
+class CriterionScore(Bias):
+    """support aic, aicc, bic, mallows cp indexs."""
+    pass
+
+
+def TreeImportanceArray(reg):
+    """Get important array if `reg` is tree regression."""
+    return reg.feature_importances_

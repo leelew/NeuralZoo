@@ -1,30 +1,26 @@
-from MetReg.benchmark.metrics import rmse, nse, mae, r2
+from MetReg.benchmark.metrics import (RMSE, Bias, InterannualVariablity,
+                                      SpatialDist)
 
 
 class ScoreBoard():
-    """A class for score board for spatial & temporal analysis.
-    """
-    
-    def __init__(self, 
-                 y_true, 
-                 y_pred,
-                 benchmark_mode=None):
-        self.benchmark_mode = benchmark_mode
-        if self.benchmark_mode is None:
-            assert y_true.ndims == 3
-        elif self.benchmark_mode == 'temporal':
-            assert y_true.ndims 
+    """A class for score board for spatial & temporal analysis using
+    ILAMB scores and calculation methods.
 
-    def _set_benchmark_mode(self, X):
-        if X.ndims == 3:
-            self.benchmark_mode = 'whole'
-        elif X.ndims == 2:
-            self.benchmark_mode = 'img'
-        elif X.ndims == 1:
-            self.benchmark_mode = 'array'
+    Notes:: This class now only support 3d input dataset shape of (timestep,
+            lat, lon). We also provide 1d input dataset shape of (timestep,)
+            which provide api for users need to benchmark on site performance.
+            1d scoreboard only support mean state analysis on temporal 
+            dimensions and also aware of `SpatialDist` which need more than 
+            3d input datasets.
+    """
+
+    def __init__(self,
+                 y_true,
+                 y_pred,):
+        pass
 
     def score(self):
-        pass    
+        pass
 
     def _benchmark_array(self, y_true, y_pred):
         """time series score.
@@ -33,12 +29,4 @@ class ScoreBoard():
             y_true ([type]): shape of (timesteps,)
             y_pred ([type]): shape of (timesteps,)
         """
-        
-        
-    def _benchmark_img(self, y_true, y_pred):
         pass
-
-    def _benchmark_whole(self, y_true, y_pred):
-        pass
-
-    

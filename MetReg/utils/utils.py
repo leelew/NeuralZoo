@@ -18,17 +18,33 @@ from sklearn.metrics import (explained_variance_score, mean_absolute_error,
                              mean_squared_error, median_absolute_error,
                              r2_score)
 
+
 def print_log():
     """Basic info"""
     print('welcome to deep learning world \n')
-    print('            _____     __  __     __     _     _______     _______  ')
-    print('           / ____|   |  \/  |   | \ \  | |   |  _____|   |___ ___| ')
-    print('           \  \      | \  / |   |  \ \ | |   | |_____       | |    ')
-    print('            \  \     | |\/| |   | | \ \| |   |  _____|      | |    ')
-    print('           __\  \    | |  | |   | |  \ \ |   | |_____       | |    ')
-    print('          |_____/    |_|  |_|   |_|   \__|   |_______|      |_|    ')
-    print('\n[SMNET][INFO] @author: Lu Li')
-    print('[SMNET][INFO] @mail: lilu35@mail2.sysu.edu.cn \n')
+    print('      __  __     _______     _______     ____       _______')
+    print('     |  \/  |   |  _____|   |___ ___|   |  _  |    |  _____|')
+    print('     | \  / |   | |_____       | |      | |_|_|    | |_____ ')
+    print('     | |\/| |   |  _____|      | |      | | \ \    |  _____|')
+    print('     | |  | |   | |_____       | |      | |  \ \   | |_____')
+    print('     |_|  |_|   |_______|      |_|      |_|   \_\  |_______|')
+    print('\n[MetReg][INFO] @author: Lu Li')
+    print('[MetReg][INFO] @mail: lilu35@mail2.sysu.edu.cn \n')
+
+
+def inverse(pred, true):
+    """Inverse prediction array with true array"""
+    # scaler
+    scaler = MinMaxScaler()
+    # inverse
+    for i in range(true.shape[1]):
+        for j in range(true.shape[2]):
+            if (np.isnan(true[:, i, j, :]).any()) or (np.isnan(pred[:, i, j, :]).any()):
+                print('This pixel ')
+            else:
+                scaler.fit_transform(true[:, i, j, :])
+                pred[:, i, j, :] = scaler.inverse_transform(pred[:, i, j, :])
+    return pred
 
 
 def save2pickle(data, out_path, out_file):
@@ -41,7 +57,8 @@ def save2pickle(data, out_path, out_file):
     pickle.dump(data, handle, protocol=4)
     handle.close()
 
-def save(mdl:dict, dir_save, name_save):
+
+def save(mdl: dict, dir_save, name_save):
     """save sklearn model.
 
     Args:
@@ -51,8 +68,8 @@ def save(mdl:dict, dir_save, name_save):
     """
     if not os.path.isdir(os.getcwd() + dir_save):
         os.mkdir(os.getcwd() + dir_save)
-        
-    pickle.dump(mdl, open(os.getcwd() + dir_save + name_save,'wb'))
+
+    pickle.dump(mdl, open(os.getcwd() + dir_save + name_save, 'wb'))
 
 
 def tictoc(func):
