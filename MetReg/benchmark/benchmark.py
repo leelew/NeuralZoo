@@ -1,6 +1,6 @@
 from MetReg.benchmark.metrics import (RMSE, Bias, InterannualVariablity,
                                       SpatialDist, CriterionScore, PhaseShift,
-                                      RegressionScore)
+                                      RegressionScore, OverallScore)
 
 
 class ScoreBoard():
@@ -18,13 +18,20 @@ class ScoreBoard():
     def __init__(self,
                  y_true,
                  y_pred,
-                 ):
-        pass
+                 score_list=None,
+                 mode=None):
+        if mode is None:
+            self._get_benchmark_mode()
+        else:
+            self.mode = mode
 
-    def cal_overall_score(self):
-        pass
+    def benchmark(self, y_true, y_pred):
+        if self.mode == 1:
+            return self._benchmark_array(y_true, y_pred)
+        else:
+            return self._benchmark_image_pools(y_true, y_pred)
 
-    def cal_overall_score_1d(self):
+    def _get_benchmark_mode(self):
         pass
 
     def _benchmark_array(self, y_true, y_pred):
@@ -34,4 +41,7 @@ class ScoreBoard():
             y_true ([type]): shape of (timesteps,)
             y_pred ([type]): shape of (timesteps,)
         """
-        pass
+        return OverallScore().score_1d(y_true, y_pred)
+
+    def _benchmark_image_pools(self, y_true, y_pred):
+        return OverallScore().score_3d(y_true, y_pred)

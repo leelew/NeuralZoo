@@ -148,7 +148,7 @@ class SpatialDist(Bias):
         """
         return np.corrcoef(y_true.reshape(-1,), y_pred.reshape(-1,))[0, 1]
 
-    def _cal_score_dist(self, y_true, y_pred):
+    def cal_dist(self, y_true, y_pred):
         v_ref = np.mean(y_true, axis=0)
         v_mod = np.mean(y_pred, axis=0)
         std_ = self._cal_normalized_std(v_ref, v_mod)
@@ -201,3 +201,29 @@ class CriterionScore(Bias):
 def TreeImportanceArray(reg):
     """Get important array if `reg` is tree regression."""
     return reg.feature_importances_
+
+
+class OverallScore():
+    """Get overall score for benchmarking using method from ILAMB.
+    """
+
+    def __init__(self):
+        self.bias = Bias()
+        self.rmse = RMSE()
+        self.iv = InterannualVariablity()
+        self.dist = SpatialDist()
+
+    def score_3d(self, y_true, y_pred):
+        bias = self.bias.cal_bias(y_true, y_pred)
+        rmse = self.rmse.cal_rmse(y_true, y_pred)
+        iv = self.iv.cal_iv(y_true, y_pred)
+        dist = self.dist.cal_dist(y_true, y_pred)
+
+        return (bias + 2 * rmse + iv + dist) / (1 + 2 + 1 + 1)
+
+    def score_1d(self, y_true, y_pred):
+        bias = self.bias._cal_score_bias(y_true, y_pred)
+        rmse = self.rmse._cal_score_rmse(y_true, y_pred)
+        iv = self.iv._cal_score_iv(y_true, y_pred)
+
+        return (bias + 2 * rmse + iv) / (1 + 2 + 1 + 1)
