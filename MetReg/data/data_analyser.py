@@ -18,6 +18,9 @@ class Data_analyser_ts():
     def calc(self):
         pass
 
+    def _cal_jd(self):
+        pass
+
     def _calc_adf(self, timeseries):
         adf = adfuller(timeseries)
         if adf[1] < 0.05:

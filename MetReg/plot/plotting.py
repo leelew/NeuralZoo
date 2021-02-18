@@ -1,11 +1,71 @@
+from __future__ import print_function
+
+import datetime as dt
+import itertools as it
+
+import daft
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
+import pandas as pd
+import statsmodels.tsa.stattools as ts
+from matplotlib import rc
 from matplotlib.projections import PolarAxes
 from mpl_toolkits import Basemap
 
 
+class Figure():
+
+    """
+    parameters
+    __________
+    
+        
+    Attributes
+    __________
+    
+    
+    """
+
+    def __init__(self,
+                 data,
+                 max_tau):
+
+        self.data = data
+        self.T, self.N = self.data.shape
+        self.max_tau = max_tau
+
+    def _plot_graph_single(self,
+                           tau=5,
+                           parents=None):
+        """
+        
+        parents {0: [(0,1),(0,4),(1,3)...]}
+        """
+
+        # set font and text of graph
+        rc("font", family="serif", size=12)
+        rc("text", usetex=True)
+        # class probability graphical model
+        pgm = daft.PGM()
+        p_color = {"ec": "#46a546"}
+        #
+        for index_parent, (xi, yi) in enumerate(it.product(range(1+tau), range(self.N))):
+            pgm.add_node(str(index_parent), "", xi, yi, plot_params=p_color)
+
+        for i in range(self.N):
+            print(parents[i])
+            for _, (index_N, index_T) in enumerate(parents[i]):
+                print(self.N*index_T+index_N)
+                #print(index_T,index_N)
+                #print(self.N)
+
+                pgm.add_edge(str(self.N*index_T+index_N), str(i))
+
+        pgm.render()
+
+        pgm.savefig("pgm.pdf")
 def plot_taylor_diagram(stdev,
                         corrcoeff,
                         refstd,
