@@ -1,12 +1,10 @@
+import os
+import numpy as np
+from MetReg.data.data_generator import Data_generator
+from MetReg.data.data_preprocessor import Data_preprocessor
+from MetReg.utils.utils import save2pickle
 import sys
 sys.path.append('../../')
-
-from MetReg.utils.utils import save2pickle
-from MetReg.data.data_preprocessor import Data_preprocessor
-from MetReg.data.data_generator import Data_generator
-import numpy as np
-import os
-
 
 
 def _get_task_from_regions(num_lat, num_lon, interval):
@@ -66,13 +64,14 @@ def main(X,
 
 if __name__ == "__main__":
 
-    st = np.load('/hard/lilu/ERA5_1981_2017_DD_A1_st_lv1.npy')
-    swv = np.load('/hard/lilu/ERA5_1981_2017_DD_A1_swv_lv1.npy')
-    mtpr = np.load('/hard/lilu/ERA5_1981_2017_DD_A1_mtpr.npy')
+    input_path = '/WORK/sysu_yjdai_6/hard/lilu/'
+    st = np.load(input_path+'ERA5_1981_2017_DD_A1_st_lv1.npy')
+    swv = np.load(input_path+'ERA5_1981_2017_DD_A1_swv_lv1.npy')
+    mtpr = np.load(input_path+'ERA5_1981_2017_DD_A1_mtpr.npy')
 
     X = np.concatenate((swv, st, mtpr), axis=-1)
     y = swv
 
     del swv, st, mtpr
 
-    main(X, y)
+    main(X, y, out_path='/WORK/sysu_yjdai_6/hard/lilu/ERA5_1981_2017_DD_A1/')

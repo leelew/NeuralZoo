@@ -14,18 +14,18 @@ from matplotlib import rc
 from matplotlib.projections import PolarAxes
 from mpl_toolkits import Basemap
 
-import pandas as pd
+
 class Figure():
 
     """
     parameters
     __________
-    
-        
+
+
     Attributes
     __________
-    
-    
+
+
     """
 
     def __init__(self,
@@ -40,7 +40,7 @@ class Figure():
                            tau=5,
                            parents=None):
         """
-        
+
         parents {0: [(0,1),(0,4),(1,3)...]}
         """
 
@@ -58,14 +58,16 @@ class Figure():
             print(parents[i])
             for _, (index_N, index_T) in enumerate(parents[i]):
                 print(self.N*index_T+index_N)
-                #print(index_T,index_N)
-                #print(self.N)
+                # print(index_T,index_N)
+                # print(self.N)
 
                 pgm.add_edge(str(self.N*index_T+index_N), str(i))
 
         pgm.render()
 
         pgm.savefig("pgm.pdf")
+
+
 def plot_taylor_diagram(stdev,
                         corrcoeff,
                         refstd,
@@ -152,7 +154,7 @@ def plot_taylor_diagram(stdev,
     return ax
 
 
-def plot_boxplot(metrics, 
+def plot_boxplot(metrics,
                  mdl_list=None,
                  color_list=None):
     """plot boxplot.
@@ -176,18 +178,17 @@ def plot_boxplot(metrics,
 
     # boxplot
     for i in range(metrics.shape[-1]):
-        df = pd.Series(metrics[:,i])
-        ax.boxplot(df.dropna().values, 
-                    positions=1.5*i,
-                    notch=True,
-                    widths=0.4, 
-                    whis=0.4, 
-                    patch_artist=True, 
-                    showfliers=False,
-                    boxprops=dict(facecolor='dodgerblue', color='black') )
-    
-    plt.savefig('boxplot.pdf')
+        df = pd.Series(metrics[:, i])
+        ax.boxplot(df.dropna().values,
+                   positions=1.5*i,
+                   notch=True,
+                   widths=0.4,
+                   whis=0.4,
+                   patch_artist=True,
+                   showfliers=False,
+                   boxprops=dict(facecolor='dodgerblue', color='black'))
 
+    plt.savefig('boxplot.pdf')
 
 
 def _get_grid_attribute():
