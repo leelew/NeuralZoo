@@ -1,8 +1,9 @@
-from MetReg.benchmark.metrics import (RMSE, Bias, InterannualVariablity,
-                                      SpatialDist, CriterionScore, PhaseShift,
-                                      DefaultRegressionScore, OverallScore)
-
 import numpy as np
+from MetReg.benchmark.metrics import (RMSE, Bias, CriterionScore,
+                                      DefaultRegressionScore,
+                                      InterannualVariablity, OverallScore,
+                                      PhaseShift, SpatialDist)
+
 
 class ScoreBoard():
     """A class for score board for spatial & temporal analysis using
@@ -17,10 +18,8 @@ class ScoreBoard():
     """
 
     def __init__(self,
-                 y_true,
-                 y_pred,
-                 score_list=None,
                  mode=None,
+                 score_list=None,
                  overall_score=False):
         if mode is None:
             self._get_benchmark_mode()
@@ -63,8 +62,10 @@ class ScoreBoard():
 
             for i in range(Nlat):
                 for j in range(Nlon):
-                    score = drs.cal(y_true[:,i,j], y_pred[:,i,j])
-                    score_[:, i, j] = np.array(score)
+                    if not np.isnan(y_pred[:,i,j]).any():
+                        print(y_pred[:,i,j])
+                        score = drs.cal(y_true[:,i,j], y_pred[:,i,j])
+                        score_[:, i, j] = np.array(score)
             return score_
 
     

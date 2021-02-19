@@ -14,7 +14,7 @@ from matplotlib import rc
 from matplotlib.projections import PolarAxes
 from mpl_toolkits import Basemap
 
-
+import pandas as pd
 class Figure():
 
     """
@@ -150,6 +150,44 @@ def plot_taylor_diagram(stdev,
     ax.clabel(contours, fmt='%1.1f')
 
     return ax
+
+
+def plot_boxplot(metrics, 
+                 mdl_list=None,
+                 color_list=None):
+    """plot boxplot.
+
+    Args:
+        metrics (nd.array): 
+            shape of (grids, models), the last dims could be 1d.
+        mdl_list ([type]): 
+            shape of (models), use for label, must have the same dimesion 
+            with the last dimension of metrics.
+        color_list ([type]): [description]
+    """
+    fig = plt.figure(figsize=(10, 8))
+
+    ax = plt.subplot2grid((2, 2), (0, 0), colspan=2, rowspan=2)
+
+    ax.spines['left'].set_linewidth(2)
+    ax.spines['bottom'].set_linewidth(2)
+    ax.spines['right'].set_linewidth(2)
+    ax.spines['top'].set_linewidth(2)
+
+    # boxplot
+    for i in range(metrics.shape[-1]):
+        df = pd.Series(metrics[:,i])
+        ax.boxplot(df.dropna().values, 
+                    positions=1.5*i,
+                    notch=True,
+                    widths=0.4, 
+                    whis=0.4, 
+                    patch_artist=True, 
+                    showfliers=False,
+                    boxprops=dict(facecolor='dodgerblue', color='black') )
+    
+    plt.savefig('boxplot.pdf')
+
 
 
 def _get_grid_attribute():

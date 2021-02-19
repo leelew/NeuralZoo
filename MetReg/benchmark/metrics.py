@@ -199,6 +199,7 @@ class DefaultRegressionScore:
         return Bias()._cal_bias(y_true, y_pred)
 
     def cal(self, y_true, y_pred):
+        
         bias = self._cal_bias(y_true, y_pred)
         rmse = self._cal_rmse(y_true, y_pred)
         nse = self._cal_nse(y_true, y_pred)
