@@ -111,8 +111,12 @@ def inference(X,
 
 if __name__ == "__main__":
 
+    import argparse
+    parse = argparse.ArgumentParser()
+    parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
+    config = parse.parse_args()
 
-    _predict(mdl_name='ml.knn.knn')
+    _predict(mdl_name=config.mdl_name)
 
     """
 

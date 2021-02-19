@@ -1,7 +1,8 @@
 from MetReg.benchmark.metrics import (RMSE, Bias, InterannualVariablity,
                                       SpatialDist, CriterionScore, PhaseShift,
-                                      RegressionScore, OverallScore)
+                                      DefaultRegressionScore, OverallScore)
 
+import numpy as np
 
 class ScoreBoard():
     """A class for score board for spatial & temporal analysis using
@@ -19,11 +20,14 @@ class ScoreBoard():
                  y_true,
                  y_pred,
                  score_list=None,
-                 mode=None):
+                 mode=None,
+                 overall_score=False):
         if mode is None:
             self._get_benchmark_mode()
         else:
             self.mode = mode
+        
+        self.overall_score=overall_score
 
     def benchmark(self, y_true, y_pred):
         if self.mode == 1:
@@ -34,6 +38,7 @@ class ScoreBoard():
     def _get_benchmark_mode(self):
         pass
 
+
     def _benchmark_array(self, y_true, y_pred):
         """time series score.
 
@@ -41,7 +46,25 @@ class ScoreBoard():
             y_true ([type]): shape of (timesteps,)
             y_pred ([type]): shape of (timesteps,)
         """
-        return OverallScore().score_1d(y_true, y_pred)
+
+        if self.overall_score:
+            return OverallScore().score_1d(y_true, y_pred)
+        else:
+            return DefaultRegressionScore().cal(y_true, y_pred)
 
     def _benchmark_image_pools(self, y_true, y_pred):
-        return OverallScore().score_3d(y_true, y_pred)
+
+        if self.overall_score:
+            return OverallScore().score_3d(y_true, y_pred)
+        else:
+            drs = DefaultRegressionScore()
+            _, Nlat, Nlon = y_true.shape
+            score_ = np.full((4, Nlat, Nlon), np.nan)
+
+            for i in range(Nlat):
+                for j in range(Nlon):
+                    score = drs.cal(y_true[:,i,j], y_pred[:,i,j])
+                    score_[:, i, j] = np.array(score)
+            return score_
+
+    

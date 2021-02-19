@@ -163,7 +163,7 @@ class PhaseShift(Bias):
         pass
 
 
-class RegressionScore:
+class DefaultRegressionScore:
     """All regression scores includes bias, rmse, r2, mae, mse, nse. 
 
     Notes:: Now only support bias & rmse for ilamb edition, which represents
@@ -191,7 +191,20 @@ class RegressionScore:
         nse_ = 1-(
             np.sum((y_true-y_pred)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
         return nse_
+    
+    def _cal_rmse(self, y_true, y_pred):
+        return RMSE()._cal_rmse(y_true, y_pred)
 
+    def _cal_bias(self, y_true, y_pred):
+        return Bias()._cal_bias(y_true, y_pred)
+
+    def cal(self, y_true, y_pred):
+        bias = self._cal_bias(y_true, y_pred)
+        rmse = self._cal_rmse(y_true, y_pred)
+        nse = self._cal_nse(y_true, y_pred)
+        r2 = self._cal_r2(y_true, y_pred)
+
+        return [bias, rmse, nse, r2]
 
 class CriterionScore(Bias):
     """support aic, aicc, bic, mallows cp indexs."""
