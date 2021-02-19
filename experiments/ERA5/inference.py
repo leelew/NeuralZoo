@@ -1,7 +1,6 @@
 import pickle
 
 import numpy as np
-from MetReg.benchmark.metrics import nse
 #from MetReg.api.model_io import model_benchmarker, model_loader
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
@@ -23,7 +22,7 @@ def _predict_1task(X,
     N, _, nlat, nlon, _ = y.shape
 
     # init
-    y_pred = np.full((nlat, nlon), np.nan)
+    y_pred = np.full((N, nlat, nlon), np.nan)
 
     # predict
     for i in range(nlat):
@@ -113,7 +112,7 @@ def inference(X,
 if __name__ == "__main__":
 
 
-    _predict(mdl_name='ml.elm.elm')
+    _predict(mdl_name='ml.knn.knn')
 
     """
 

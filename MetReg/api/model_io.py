@@ -1,7 +1,6 @@
 import os
 import pickle
 
-from MetReg.benchmark.benchmark import _benchmark_array, _benchmark_img
 from MetReg.models.dl.cnn import BaseCNNRegressor
 from MetReg.models.dl.convrnn import (AttConvLSTMRegressor,
                                       BaseConvLSTMRegressor, trajGRURegressor)
