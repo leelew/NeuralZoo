@@ -93,19 +93,4 @@ if __name__ == "__main__":
 
     """
     r2_world = np.concatenate((r2_world[:, 181:], r2_world[:, :181]), axis=-1)
-    rmse_world = np.concatenate((rmse_world[:, 181:], rmse_world[:, :181]), axis=-1)
-    mae_world = np.concatenate((mae_world[:, 181:], mae_world[:, :181]), axis=-1)
-    nse_world = np.concatenate((nse_world[:, 181:], nse_world[:, :181]), axis=-1)
-    mean_world = np.concatenate((mean_world[:, 181:], mean_world[:, :181]), axis=-1)
-
-    metrics = {
-        'r2': r2_world,
-        'rmse': rmse_world,
-        'mae':mae_world,
-        'nse':nse_world,
-        'mean': mean_world
-        }
-
-    np.save('metric_'+config.mdl_name+'.npy', metrics)
-
     """

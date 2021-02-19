@@ -37,59 +37,43 @@ def main(mdl_name='ml.tree.lightgbm',
     X_train, X_valid, y_train, y_valid, mask = _read_inputs(task=task)
 
     # get shape
-    NLAT, NLON = mask.shape
-
     _, T, H, W, F = X_train.shape
-    # saved model
 
+    # train & save model
     if mdl_name.split('.')[0] == 'sdl':
+
         mdl = ModelInterface(mdl_name=mdl_name).get_model()
 
         mdl.compile(optimizer='adam', loss='mse')
-        mdl.fit(X_train.reshape(-1, H, W, T*F),
+        mdl.fit(X_train.reshape(-1, T, H, W, F),
                 y_train[:, 0, :, :, :], batch_size=32, epochs=50)
-        y_predict = mdl.predict(X_valid)
 
-        for i in range(NLAT):
-            for j in range(NLON):
-                if not np.isnan(mask[i, j]):
-                    print(r2_score(y_valid[:, 0, i, j, 0], y_predict[:, i, j]))
-        saved_mdl = mdl
-
-        ModelSaver(saved_mdl, mdl_name=mdl_name,
+        ModelSaver(mdl, mdl_name=mdl_name,
                 dir_save='/hard/lilu/saved_models/'+mdl_name,
                 name_save='/saved_model_' + str(task))()
     
     else:
 
-        a = time.time()
-        saved_mdl = [[] for i in range(NLAT)]
+        saved_mdl = [[] for i in range(H)]
 
-        for i in range(NLAT):
-            for j in range(NLON):
+        for i in range(H):
+            for j in range(W):
                 if not np.isnan(mask[i, j]):
-                    # training & saving trained-models
+
                     mdl = ModelInterface(mdl_name=mdl_name).get_model()
+
                     if mdl_name.split('.')[0] == 'ml':
 
-                        mdl.fit(
-                            X_train[:, :, i, j, :].reshape(
+                        mdl.fit(X_train[:, :, i, j, :].reshape(
                                 X_train.shape[0], -1),
                             y_train[:, 0, i, j, 0])
 
-                        y_predict = mdl.predict(
-                            X_valid[:, :, i, j, :].reshape(X_valid.shape[0], -1))
-
-                        print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
-
                     elif mdl_name.split('.')[0] == 'dl':
-                        mdl.compile(optimizer='adam', loss='mse')
-                        mdl.fit(
-                            X_train[:, :, i, j, :],
-                            y_train[:, 0, i, j, 0], batch_size=32, epochs=5,)
 
-                        y_predict = mdl.predict(X_valid[:, :, i, j, :])
-                        print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
+                        mdl.compile(optimizer='adam', loss='mse')
+                        mdl.fit(X_train[:, :, i, j, :],
+                                y_train[:, 0, i, j, 0], 
+                                batch_size=32, epochs=5,)
 
                     else:
                         print('manual train class')
@@ -97,8 +81,6 @@ def main(mdl_name='ml.tree.lightgbm',
                     saved_mdl[i].append(mdl)
                 else:
                     saved_mdl[i].append(None)
-        b = time.time()
-        print(b-a)
 
         ModelSaver(saved_mdl, mdl_name=mdl_name,
                 dir_save='/hard/lilu/saved_models/'+mdl_name,
@@ -112,11 +94,11 @@ if __name__ == "__main__":
     parse.add_argument('--mdl_name', type=str, default='ml.elm.elm')
     config = parse.parse_args()
 
-    #main(mdl_name=config.mdl_name, task=0)
+    main(mdl_name=config.mdl_name, task=0)
 
-    
+    """
     for task in range(200):
         print('task = {}'.format(task))
 
         main(mdl_name=config.mdl_name, task=task)
-    
+    """
