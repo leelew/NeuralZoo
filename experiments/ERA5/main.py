@@ -56,64 +56,67 @@ def main(mdl_name='ml.tree.lightgbm',
                     print(r2_score(y_valid[:, 0, i, j, 0], y_predict[:, i, j]))
         saved_mdl = mdl
 
-    ModelSaver(saved_mdl, mdl_name=mdl_name,
-               dir_save='/hard/lilu/saved_models/'+mdl_name,
-               name_save='/saved_model_' + str(task))()
+        ModelSaver(saved_mdl, mdl_name=mdl_name,
+                dir_save='/hard/lilu/saved_models/'+mdl_name,
+                name_save='/saved_model_' + str(task))()
+    
+    else:
 
-    """
-    a = time.time()
-    saved_mdl = [[] for i in range(NLAT)]
+        a = time.time()
+        saved_mdl = [[] for i in range(NLAT)]
 
-    for i in range(NLAT):
-        for j in range(NLON):
-            if not np.isnan(mask[i, j]):
-                # training & saving trained-models
-                mdl = ModelInterface(mdl_name=mdl_name).get_model()
-                if mdl_name.split('.')[0] == 'ml':
+        for i in range(NLAT):
+            for j in range(NLON):
+                if not np.isnan(mask[i, j]):
+                    # training & saving trained-models
+                    mdl = ModelInterface(mdl_name=mdl_name).get_model()
+                    if mdl_name.split('.')[0] == 'ml':
 
-                    mdl.fit(
-                        X_train[:, :, i, j, :].reshape(
-                            X_train.shape[0], -1),
-                        y_train[:, 0, i, j, 0])
+                        mdl.fit(
+                            X_train[:, :, i, j, :].reshape(
+                                X_train.shape[0], -1),
+                            y_train[:, 0, i, j, 0])
 
-                    y_predict = mdl.predict(
-                        X_valid[:, :, i, j, :].reshape(X_valid.shape[0], -1))
+                        y_predict = mdl.predict(
+                            X_valid[:, :, i, j, :].reshape(X_valid.shape[0], -1))
 
-                    print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
+                        print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
 
-                elif mdl_name.split('.')[0] == 'dl':
-                    mdl.compile(optimizer='adam', loss='mse')
-                    mdl.fit(
-                        X_train[:, :, i, j, :],
-                        y_train[:, 0, i, j, 0], batch_size=32, epochs=5,)
+                    elif mdl_name.split('.')[0] == 'dl':
+                        mdl.compile(optimizer='adam', loss='mse')
+                        mdl.fit(
+                            X_train[:, :, i, j, :],
+                            y_train[:, 0, i, j, 0], batch_size=32, epochs=5,)
 
-                    y_predict = mdl.predict(X_valid[:, :, i, j, :])
-                    print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
+                        y_predict = mdl.predict(X_valid[:, :, i, j, :])
+                        print(r2_score(y_valid[:, 0, i, j, 0], y_predict))
 
+                    else:
+                        print('manual train class')
+
+                    saved_mdl[i].append(mdl)
                 else:
-                    print('manual train class')
+                    saved_mdl[i].append(None)
+        b = time.time()
+        print(b-a)
 
-                saved_mdl[i].append(mdl)
-            else:
-                saved_mdl[i].append(None)
-    b = time.time()
-    print(b-a)
-
-    ModelSaver(saved_mdl, mdl_name=mdl_name,
-               dir_save='/hard/lilu/saved_models/'+mdl_name,
-               name_save='/saved_model_' + str(task))()
-    """
+        ModelSaver(saved_mdl, mdl_name=mdl_name,
+                dir_save='/hard/lilu/saved_models/'+mdl_name,
+                name_save='/saved_model_' + str(task))()
+    
 
 
 if __name__ == "__main__":
 
     parse = argparse.ArgumentParser()
-    parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
+    parse.add_argument('--mdl_name', type=str, default='ml.elm.elm')
     config = parse.parse_args()
 
     #main(mdl_name=config.mdl_name, task=0)
 
+    
     for task in range(200):
         print('task = {}'.format(task))
 
         main(mdl_name=config.mdl_name, task=task)
+    
