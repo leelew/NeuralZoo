@@ -5,25 +5,24 @@ import numpy as np
 import tensorflow as tf
 from MetReg.benchmark.benchmark import ScoreBoard
 
-from _data_generator import _get_task_from_regions
-from main import _read_inputs
+from data_generator import _get_task_from_regions
+from train import _read_inputs
 
 
-def _predict_1task(X, 
-              y,
-              task,
-              mdl_name='ml.tree.lightgbm',
-              save_path='/hard/lilu/saved_models/',):
+def _predict_1task(X,
+                   y,
+                   task,
+                   mdl_name='ml.tree.lightgbm',
+                   save_path='/hard/lilu/saved_models/',):
     # shape
     N, _, nlat, nlon, _ = y.shape
 
     # init
     y_pred = np.full((N, nlat, nlon), np.nan)
 
-
     if mdl_name.split('.')[0] == 'ml':
         f = open(save_path + mdl_name + '/saved_model_' +
-                str(task) + '.pickle', 'rb')
+                 str(task) + '.pickle', 'rb')
         saved_model = pickle.load(f)
 
         # predict
@@ -31,7 +30,8 @@ def _predict_1task(X,
             for j in range(nlon):
                 mdl = saved_model[i][j]
                 if mdl is not None:
-                    y_pred[:,i,j] = mdl.predict(X[:,:,i,j,:].reshape(N, -1))
+                    y_pred[:, i, j] = mdl.predict(
+                        X[:, :, i, j, :].reshape(N, -1))
 
     elif mdl_name.split('.')[0] == 'sdl':
 
@@ -40,19 +40,18 @@ def _predict_1task(X,
         y_pred = np.squeeze(mdl.predict(X))
 
     y_true = y.reshape(N, nlat, nlon)
-    
-    return y_pred, y_true
 
+    return y_pred, y_true
 
 
 def _predict(mdl_name):
     # get region and task
     region = _get_task_from_regions(180, 360, 18)
 
-    _,_,_, y_valid, _ = _read_inputs(task=0)
+    _, _, _, y_valid, _ = _read_inputs(task=0)
 
     # shape
-    N, _, nlat, nlon, _  = y_valid.shape
+    N, _, nlat, nlon, _ = y_valid.shape
 
     # init
     y_pred = np.full((N, 180, 360), np.nan)
@@ -62,17 +61,19 @@ def _predict(mdl_name):
 
         print('now processing jobs {}'.format(num_jobs))
         X_train, X_valid, y_train, y_valid, mask = _read_inputs(task=num_jobs)
-        y_pred_, y_true_ = _predict_1task(X_valid, y_valid, task=num_jobs, mdl_name=mdl_name)
-        y_pred[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_pred_+mask.reshape(1, 18,18).repeat(N, axis=0)
-        y_true[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_true_+mask.reshape(1, 18,18).repeat(N, axis=0)
-        
+        y_pred_, y_true_ = _predict_1task(
+            X_valid, y_valid, task=num_jobs, mdl_name=mdl_name)
+        y_pred[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_pred_ + \
+            mask.reshape(1, 18, 18).repeat(N, axis=0)
+        y_true[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_true_ + \
+            mask.reshape(1, 18, 18).repeat(N, axis=0)
+
     np.save(mdl_name.split('.')[-1]+'_pred.npy', y_pred)
     np.save(mdl_name.split('.')[-1]+'_true.npy', y_true)
 
 
-def benchmark(mdl_name, 
+def benchmark(mdl_name,
               save_path='/work/lilu/MetReg/experiments/ERA5/'):
-    
 
     y_pred = np.load(mdl_name.split('.')[-1]+'_pred.npy')
     y_true = np.load(mdl_name.split('.')[-1]+'_true.npy')

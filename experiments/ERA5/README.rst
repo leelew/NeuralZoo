@@ -17,3 +17,29 @@ Pipelines
 4. Train and save models.
 
 5. Inference and plot results.
+
+Structure
+----------
+All experiments obey the **structure** shown as ERA5 application. It must contains the following files.
+
+1. data_loader.py
+
+    Read raw data from original folder and generate .npy (json or pickle) type first edition datasets.
+
+2. data_generator.py
+
+    Read un-processed datasets after exec `data_loader.py` and preprocessing (also splitting into sub-datasets for special experiments, such as world forecasting), finally, saving.
+
+3. train.py
+
+    Select models and train models, also save models.
+
+4. inference.py
+
+    Predict and benchmark the models.
+
+5. plot.py
+
+    Visualization.
+
+

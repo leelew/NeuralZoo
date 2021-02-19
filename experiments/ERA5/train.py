@@ -1,6 +1,8 @@
 import argparse
 import pickle
 import time
+import sys
+sys.path.append('../../')
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -49,9 +51,9 @@ def main(mdl_name='ml.tree.lightgbm',
                 y_train[:, 0, :, :, :], batch_size=32, epochs=50)
 
         ModelSaver(mdl, mdl_name=mdl_name,
-                dir_save='/hard/lilu/saved_models/'+mdl_name,
-                name_save='/saved_model_' + str(task))()
-    
+                   dir_save='/hard/lilu/saved_models/'+mdl_name,
+                   name_save='/saved_model_' + str(task))()
+
     else:
 
         saved_mdl = [[] for i in range(H)]
@@ -66,13 +68,13 @@ def main(mdl_name='ml.tree.lightgbm',
 
                         mdl.fit(X_train[:, :, i, j, :].reshape(
                                 X_train.shape[0], -1),
-                            y_train[:, 0, i, j, 0])
+                                y_train[:, 0, i, j, 0])
 
                     elif mdl_name.split('.')[0] == 'dl':
 
                         mdl.compile(optimizer='adam', loss='mse')
                         mdl.fit(X_train[:, :, i, j, :],
-                                y_train[:, 0, i, j, 0], 
+                                y_train[:, 0, i, j, 0],
                                 batch_size=32, epochs=5,)
 
                     else:
@@ -83,18 +85,20 @@ def main(mdl_name='ml.tree.lightgbm',
                     saved_mdl[i].append(None)
 
         ModelSaver(saved_mdl, mdl_name=mdl_name,
-                dir_save='/hard/lilu/saved_models/'+mdl_name,
-                name_save='/saved_model_' + str(task))()
-    
+                   dir_save='/hard/lilu/saved_models/'+mdl_name,
+                   name_save='/saved_model_' + str(task))()
 
 
 if __name__ == "__main__":
 
     parse = argparse.ArgumentParser()
-    parse.add_argument('--mdl_name', type=str, default='ml.elm.elm')
+    parse.add_argument('--mdl_name', type=str, default='dl.rnn.lstm')
     config = parse.parse_args()
 
-    main(mdl_name=config.mdl_name, task=0)
+    main(mdl_name=config.mdl_name,
+         input_path='/WORK/sysu_yjdai_6/hard/lilu/ERA5_1981_2017_DD_A1/',
+         mask_path='/WORK/sysu_yjdai_6/hard/lilu/ERA5_1981_2017_DD_A1/',
+         task=0)
 
     """
     for task in range(200):
