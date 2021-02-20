@@ -72,14 +72,19 @@ def _predict(mdl_name):
 
 
 def benchmark(mdl_name,
-              save_path='/work/lilu/MetReg/experiments/ERA5/'):
+              save_path='/hard/lilu/out/',
+              out_path='/hard/lilu/score/'):
 
-    y_pred = np.load(mdl_name.split('.')[-1]+'_pred.npy')
-    y_true = np.load(mdl_name.split('.')[-1]+'_true.npy')
+    y_pred = np.load(save_path+mdl_name.split('.')[-1]+'_pred.npy')
+    y_true = np.load(save_path+mdl_name.split('.')[-1]+'_true.npy')
 
     sb = ScoreBoard(mode=-1)
     score = sb.benchmark(y_true, y_pred)
-    np.save(mdl_name.split('.')[-1]+'_score.npy', score)
+    np.save(out_path+mdl_name.split('.')[-1]+'_score.npy', score)
+    
+    #sb = ScoreBoard(mode=-1, overall_score=True)
+    #score = sb.benchmark(y_true, y_pred)
+    #print(score)
 
 
 if __name__ == "__main__":

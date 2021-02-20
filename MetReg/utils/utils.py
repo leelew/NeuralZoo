@@ -12,11 +12,18 @@ import functools
 import os
 import pickle
 import time
-
+import glob
+import netCDF4
 import numpy as np
 from sklearn.metrics import (explained_variance_score, mean_absolute_error,
                              mean_squared_error, median_absolute_error,
                              r2_score)
+
+import h5py
+
+def get_koppen_index():
+    koppen_index = np.array(h5py.File('koppen_index.mat')['koppen_index']).T
+    koppen_index = np.concatenate((koppen_index[:,361:], koppen_index[:,:361]), axis=-1)
 
 def _read_inputs(task,
                  input_path='/hard/lilu/ERA5_1981_2017_DD_A1/',

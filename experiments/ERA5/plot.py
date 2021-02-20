@@ -3,158 +3,201 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 
-from MetReg.utils.utils import _get_folder_list
+def output_preprocessor(mdl_list=['Ridge','KNN','SVM','ELM','RF','Adaboost',\
+                                  'GBDT','Xgboost','LightGBM','ConvLSTM'],
+                        file_type='.npy',
+                        file_path='/hard/lilu/score/'):   
 
-l = glob.glob('./score/*score.npy', recursive=True)
-print(l)
+    score = np.full((len(mdl_list), 12, 150, 360),np.nan)
+ 
+    for i, mdl_name in enumerate(mdl_list):
+        # generate score path of model
+        path = file_path + mdl_name.lower() + '_score' + file_type
 
-score = np.full((len(l), 4, 150, 360),np.nan)
-model_list = []
+        # load score file
+        score[i, :,:,:] = np.load(path)[:, :150, :]
 
-for i, file_path in enumerate(l):
-    file_name = file_path.split('/')[-1]
-    print(file_name)
-    score[i, :, :,:] = np.load(file_path)[:,:150,:]
-    model = file_name.split('_')[0]
-    model_list.append(model)
+    score[:,:,0:32, 299:346] = np.nan
+    score[:,:,0:18,287:300] = np.nan
 
-color_list=['pink','lightblue','lightgreen','lightgreen','lightgreen', \
-        'red','yellow','lightgreen','gray','gray','lightgreen']
-print(score.shape)
-
-bias = score[:,0,:,:]
-rmse = score[:,1,:,:]
-nse = score[:,2,:,:]
-r2 = score[:,3,:,:]
-
-bias[bias< -0.1] = np.nan
-bias[bias>0.1] = np.nan
-
-
-r2[r2<0] = np.nan
-#r2[r2>1] = np.nan
-
-nse[nse<0] = np.nan
-rmse[rmse<0] = np.nan
+    bias = score[:,0,:,:]
+    rmse = score[:,1,:,:]
+    nse = score[:,2,:,:]
+    r2 = score[:,3,:,:]
+    wi = score[:,4,:,:]
+    kge = score[:,5,:,:]
+    r = score[:,6,:,:]
+    m1 = score[:,7,:,:] # true
+    m2 = score[:,8,:,:] # predict
+    mae = score[:,9,:,:]
+    mse = score[:,10,:,:]
+    score_ = score[:,11,:,:]
 
 
-print(len(model_list))
-print(len(color_list))
+    bias[r2<0] = np.nan
+    nse[r2<0]= np.nan
+    rmse[r2<0] = np.nan
+    wi[r2<0] = np.nan
+    kge[r2<0] = np.nan
+    r[r2<0] = np.nan
+    mae[r2<0] = np.nan
+    mse[r2<0] = np.nan
+    score_[r2<0] = np.nan
+    r2[r2<0] = np.nan
 
 
-# boxplot
-plt.figure(figsize=(20,10))
+    return bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_
 
-#----------------------------------
-ax1 = plt.subplot(2,2,1)
-
-bias = bias.reshape(11, -1)
-
-mask = ~np.isnan(bias)
-data = [d[m] for d, m in zip(bias, mask)]
-
-print(len(data))
-plot1 = ax1.boxplot(data, vert=True, patch_artist=True, #labels=model_list, \
-showfliers=False, showmeans=True)
-plt.xticks(rotation=300)
-ax1.set_title('(a) bias')
-
-ax1.axhline(y=0, c="black", lw=0.2)
-
-#-------------------------------------
-ax2 = plt.subplot(2,2,2)
-
-rmse = rmse.reshape(11, -1)
-
-mask = ~np.isnan(rmse)
-data = [d[m] for d, m in zip(rmse, mask)]
-
-print(len(data))
-plot2 = ax2.boxplot(data, vert=True, patch_artist=True, #labels=model_list, \
-showfliers=False, showmeans=True)
-
-plt.xticks(rotation=300)
-ax2.set_title('(b) RMSE')
-
-ax2.axhline(y=0, c="black", lw=0.2)
-
-#-------------------------------------
-ax3 = plt.subplot(2,2,3)
-
-nse = nse.reshape(11, -1)
-
-mask = ~np.isnan(nse)
-data = [d[m] for d, m in zip(nse, mask)]
-
-print(len(data))
-plot3 = ax3.boxplot(data, vert=True, patch_artist=True, labels=model_list, \
-showfliers=False, showmeans=True)
-
-plt.xticks(rotation=300)
-ax3.set_title('(c) NSE')
-
-#ax2.axhline(y=0, c="black", lw=0.2)
-
-"""
-#-------------------------------------
-ax4 = plt.subplot(2,2,4)
-
-r2 = r2.reshape(11, -1)
-
-mask = ~np.isnan(r2)
-data = [d[m] for d, m in zip(r2, mask)]
-
-print(len(data))
-plot4 = ax4.boxplot(data, vert=True, patch_artist=True, labels=model_list, \
-showfliers=False, showmeans=True)
-
-plt.xticks(rotation=300)
-ax4.set_title('(d) R${^2}$')
-
-#ax2.axhline(y=0, c="black", lw=0.2)
-"""
+def get_na_mask_data(data):
+    mask = ~np.isnan(data)
+    data = [d[m] for d, m in zip(data, mask)]
+    return data
 
 
-for bplot in (plot1, plot2,plot3):
-    for patch, color in zip(bplot['boxes'], color_list):
-        patch.set_facecolor(color)
+def figure1(mdl_list=['Ridge','KNN','SVM','ELM','RF','Adaboost',\
+                      'GBDT','Xgboost','LightGBM','ConvLSTM'],                   
+            color_list=['pink','lightblue','gray','yellow','lightgreen', \
+                        'lightgreen','lightgreen','lightgreen','lightgreen', \
+                        'red'],
+            file_type='.npy',
+            file_path='/hard/lilu/score/'):
+    bias, rmse, nse, wi, kge, r, m1, m2,mae, mse, score_ = output_preprocessor(
+        mdl_list=mdl_list, 
+        file_path=file_path,  
+        file_type=file_type)
+    
+    # boxplot
+    plt.figure(figsize=(20,11))
 
-plt.savefig('boxplot_model_score.pdf')
+    #----------------------------------
+    ax1 = plt.subplot(3,3,1)
+    data = get_na_mask_data(bias.reshape(len(mdl_list),-1))
+
+    plot1 = ax1.boxplot(data, vert=True, patch_artist=True, #labels=model_list, \
+    showfliers=False, showmeans=True)
+    plt.xticks(rotation=300)
+    ax1.set_title('(a) Bias')
+
+    ax1.axhline(y=0, c="black", lw=0.2)
+
+    #-------------------------------------
+    ax2 = plt.subplot(3,3,2)
+    data = get_na_mask_data(rmse.reshape(len(mdl_list),-1))
+    plot2 = ax2.boxplot(data, vert=True, patch_artist=True, #labels=model_list, \
+                        showfliers=False, showmeans=True)
+    plt.xticks(rotation=300)
+    ax2.set_title('(b) Root Mean Squared Error')
+
+    #-------------------------------------
+    ax3 = plt.subplot(3,3,3)
+
+    data = get_na_mask_data(nse.reshape(len(mdl_list),-1))
+    plot3 = ax3.boxplot(data, 
+                        vert=True, 
+                        patch_artist=True, #labels=model_list, \
+                        showfliers=False, 
+                        showmeans=True)
+    plt.xticks(rotation=300)
+    ax3.set_title('(c) Nash-Sutcliffe Efficiency Coefficient')
+
+    #-------------------------------------
+    ax4 = plt.subplot(3,3,4)
+
+    data = get_na_mask_data(wi.reshape(len(mdl_list),-1))
+
+    plot4 = ax4.boxplot(data, vert=True, patch_artist=True, #labels=mdl_list, \
+    showfliers=False, showmeans=True)
+
+    plt.xticks(rotation=300)
+    ax4.set_title('(d) Willmott Index')
 
 
-"""
+    #-------------------------------------
+    ax5 = plt.subplot(3,3,5)
+
+    data = get_na_mask_data(kge.reshape(len(mdl_list),-1))
+
+    plot5 = ax5.boxplot(data, vert=True, patch_artist=True, #labels=mdl_list, \
+    showfliers=False, showmeans=True)
+
+    plt.xticks(rotation=300)
+    ax5.set_title('(e) Kling-Gupta Efficiency')
+
+
+    #-------------------------------------
+    ax6 = plt.subplot(3,3,6)
+
+    data = get_na_mask_data(r.reshape(len(mdl_list),-1))
+
+    plot6 = ax6.boxplot(data, vert=True, patch_artist=True, #labels=mdl_list, \
+    showfliers=False, showmeans=True)
+
+    plt.xticks(rotation=300)
+    ax6.set_title('(f) Pearson’s Correlation Index')
 
 
 
+    #-------------------------------------
+    ax7 = plt.subplot(3,3,7)
 
-a = np.load('lightgbm_score.npy')[3,:150,:].reshape(-1, 1)
-b = np.load('xgboost_score.npy')[3, :150,:].reshape(-1,1)
-c = np.load('rf_score.npy')[3,:150,:].reshape(-1,1)
-d = np.load('gbdt_score.npy')[3,:150,:].reshape(-1,1)
-e = np.load('adaboost_score.npy')[3,:150,:].reshape(-1,1)
+    data = get_na_mask_data(mae.reshape(len(mdl_list),-1))
 
-f = np.load('linear_score.npy')[3,:150,:].reshape(-1,1)
-g = np.load('svm_score.npy')[3,:150,:].reshape(-1,1)
-h = np.load('ridge_score.npy')[3,:150,:].reshape(-1,1)
-i = np.load('elm_score.npy')[3,:150,:].reshape(-1,1)
-j = np.load('knn_score.npy')[3,:150,:].reshape(-1,1)
+    plot7 = ax7.boxplot(data, vert=True, patch_artist=True, labels=mdl_list, \
+    showfliers=False, showmeans=True)
 
-k = np.load('convlstm_score.npy')[3,:150,:].reshape(-1,1)
-r2 = np.load('convlstm_score.npy')[3,:150,:]
-r21 = np.load('lightgbm_score.npy')[3,:150,:]
-r2[np.isnan(r21)] = np.nan
-k = r2.reshape(-1,1)
+    plt.xticks(rotation=300)
+    ax7.set_title('(g) Mean Absolute Error')
+
+    
+    #-------------------------------------
+    ax8 = plt.subplot(3,3,8)
+
+    data = get_na_mask_data(mse.reshape(len(mdl_list),-1))
+
+    plot8 = ax8.boxplot(data, vert=True, patch_artist=True, labels=mdl_list, \
+    showfliers=False, showmeans=True)
+
+    plt.xticks(rotation=300)
+    ax8.set_title('(h) Mean Squared Error')
+
+    #-------------------------------------
+    ax9 = plt.subplot(3,3,9)
+
+    data = get_na_mask_data(score_.reshape(len(mdl_list),-1))
+
+    plot9 = ax9.boxplot(data, vert=True, patch_artist=True, labels=mdl_list, \
+    showfliers=False, showmeans=True)
+
+    plt.xticks(rotation=300)
+    ax9.set_title('(i) MetReg score')    
 
 
-t = np.concatenate((a,b,c,d,e,f,g,h,i,j,k), axis=-1)
-t[t<0] = np.nan
-t[t>1] = np.nan
 
-mask = ~np.isnan(t)
+    for bplot in (plot1, plot2,plot3, plot4, plot5, plot6, plot7, plot8, plot9):
+        for patch, color in zip(bplot['boxes'], color_list):
+            patch.set_facecolor(color)
 
-data = [d[m] for d, m in zip(t.T, mask.T)]
+    plt.savefig('/hard/lilu/boxplot_model_score.pdf')
 
 
-plt.boxplot(data, labels=['lightgbm', 'xgboost','rf','gbdt','adaboost','lisvr','svm','ridge','elm','knn','convlstm'],showmeans=True,showfliers=False)
-plt.xticks(rotation=300)
-"""
+
+def figure2():
+    koppen_index = np.load('koppen_index.npy')
+
+    lon, lat = np.meshgrid(-180:180, -90:90)
+
+    plt.figure()
+
+    m = Basemap()
+    m.drawcoastlines(linewidth=0.2)
+    x, y = m(lon, lat)
+
+    sc = m.pcolormesh(x, y, inputs)
+
+    sc.set_edgecolor('face')
+
+    m.colorbar(sc, location='bottom')
+    plt.savefig(output_path)
+
+if __name__ == '__main__':
+    figure1()

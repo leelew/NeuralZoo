@@ -135,7 +135,7 @@ class SpatialDist(Bias):
         super().__init__()
 
     def _cal_std(self, X):
-        return np.std(X)
+        return np.nanstd(X)
 
     def _cal_normalized_std(self, y_true, y_pred):
         return self._cal_std(y_pred)/self._cal_std(y_true)
@@ -146,11 +146,15 @@ class SpatialDist(Bias):
         Args:
             y_true, y_pred (nd.array): shape of (lat,lon)
         """
+        y_true = y_true.reshape(-1,)
+        y_pred = y_pred.reshape(-1,)
+        y_true = y_true[~np.isnan(y_pred)]
+        y_pred = y_pred[~np.isnan(y_pred)]
         return np.corrcoef(y_true.reshape(-1,), y_pred.reshape(-1,))[0, 1]
 
     def cal_dist(self, y_true, y_pred):
-        v_ref = np.mean(y_true, axis=0)
-        v_mod = np.mean(y_pred, axis=0)
+        v_ref = np.nanmean(y_true, axis=0)
+        v_mod = np.nanmean(y_pred, axis=0)
         std_ = self._cal_normalized_std(v_ref, v_mod)
         scorr_ = self._cal_scorr(v_ref, v_mod)
         score_dist = 2 * (1 + scorr_) / ((std_ + 1 / std_) ** 2)
@@ -220,7 +224,18 @@ class DefaultRegressionScore:
     def _cal_mean(self, y_true, y_pred):
         m1, m2 = np.mean(y_true), np.mean(y_pred)
         return m1,m2
-    
+
+
+    def _cal_score(self, y_true, y_pred):
+        nse = self._cal_nse(y_true, y_pred)
+        wi = self._cal_wi(y_true, y_pred)
+        r = self._cal_r(y_true, y_pred)
+        rmse = RMSE()._cal_score_rmse(y_true, y_pred)
+        kge = self._cal_kge(y_true, y_pred)
+
+        return (r+wi+kge+3*rmse+2*nse)/(1+1+1+3+2)
+
+
     def cal(self, y_true, y_pred):
         
         bias = self._cal_bias(y_true, y_pred)
@@ -231,8 +246,11 @@ class DefaultRegressionScore:
         m1, m2 = self._cal_mean(y_true, y_pred)
         kge = self._cal_kge(y_true, y_pred)
         r = self._cal_r(y_true, y_pred)
+        mae = self._cal_mae(y_true, y_pred)
+        mse = self._cal_mse(y_true, y_pred)
+        score = self._cal_score(y_true, y_pred)
 
-        return [bias, rmse, nse, r2, wi, kge, r, m1, m2]
+        return [bias, rmse, nse, r2, wi, kge, r, m1, m2, mae, mse, score]
 
 class CriterionScore(Bias):
     """support aic, aicc, bic, mallows cp indexs."""
