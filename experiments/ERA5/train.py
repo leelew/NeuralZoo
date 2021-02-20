@@ -1,33 +1,13 @@
 import argparse
 import pickle
-import time
 import sys
 sys.path.append('../../')
 
-import matplotlib.pyplot as plt
 import numpy as np
 from MetReg.api.model_io import ModelInterface, ModelSaver
-from six.moves import cPickle
-from sklearn.metrics import r2_score
+from MetReg.utils.utils import _read_inputs
 
 
-def _read_inputs(task,
-                 input_path='/hard/lilu/ERA5_1981_2017_DD_A1/',
-                 mask_path='/hard/lilu/ERA5_1981_2017_DD_A1/',):
-    # load pickle
-    f = open(input_path + 'ERA5_DD_A1_case_' + str(task) + '.pickle', 'rb')
-    inputs = pickle.load(f)
-    # get train/validate set
-    X_train = inputs['X_train']
-    X_valid = inputs['X_valid']
-    y_train = inputs['y_train']
-    y_valid = inputs['y_valid']
-
-    # load pickle
-    f = open(mask_path + 'nan_mask_case_' + str(task) + '.pickle', 'rb')
-    mask = pickle.load(f)
-
-    return X_train, X_valid, y_train, y_valid, mask
 
 
 def main(mdl_name='ml.tree.lightgbm',

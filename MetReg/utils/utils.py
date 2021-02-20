@@ -18,6 +18,111 @@ from sklearn.metrics import (explained_variance_score, mean_absolute_error,
                              mean_squared_error, median_absolute_error,
                              r2_score)
 
+def _read_inputs(task,
+                 input_path='/hard/lilu/ERA5_1981_2017_DD_A1/',
+                 mask_path='/hard/lilu/ERA5_1981_2017_DD_A1/',):
+    # load pickle
+    f = open(input_path + 'ERA5_DD_A1_case_' + str(task) + '.pickle', 'rb')
+    inputs = pickle.load(f)
+    # get train/validate set
+    X_train = inputs['X_train']
+    X_valid = inputs['X_valid']
+    y_train = inputs['y_train']
+    y_valid = inputs['y_valid']
+
+    # load pickle
+    f = open(mask_path + 'nan_mask_case_' + str(task) + '.pickle', 'rb')
+    mask = pickle.load(f)
+
+    return X_train, X_valid, y_train, y_valid, mask
+
+def _read_nc(file_path):
+    """load and process single netcdf in ERA5 case.
+
+    Args:
+        file_path ([type]): [description]
+    """
+    obj = netCDF4.Dataset(file_path)
+
+    # Notes:
+    #   may be raise keyerror, ensure the key of target variables must
+    #   lay the last of variables keys sets.
+    targ_var_name = list(obj.variables.keys())[-1]
+    targ_var = obj[targ_var_name][:]
+
+    # Notes:
+    #   range of fill value must be noticed, which is case-different.
+    targ_var[targ_var < 1e-4] = np.nan
+
+    # get shape of raw data
+    Ntime, Nlat, Nlon = targ_var.shape
+
+    # init average matrix and average spatiotemporally
+    avg_spatial_targ_var = np.full((Ntime, Nlat//4, Nlon//4), np.nan)
+    for i in range(Nlat // 4):
+        for j in range(Nlon // 4):
+            _spatial_targ_var = targ_var[:, 4 * i:4 * i + 4, 4 * j:4 * j + 4]
+            avg_spatial_targ_var[:, i, j] = np.nanmean(
+                _spatial_targ_var, axis=(-1, -2))
+
+    avg_time_spatial_targ_var = np.full((Ntime//24, Nlat//4, Nlon//4), np.nan)
+    for t in range(Ntime // 24):
+        _time_targ_var = avg_spatial_targ_var[24 * t:24 * t + 24, :, :]
+        avg_time_spatial_targ_var[t, :, :] = np.mean(_time_targ_var, axis=0)
+
+    return avg_time_spatial_targ_var
+
+
+def _get_folder_list(folder_path, file_type='nc'):
+    """Get list of files in target folder.
+
+    Args:
+        folder_path (str):
+            path of main fold of files
+        file_type (str):
+            type of files in folder
+    """
+    # get list
+    l = glob.glob(folder_path + 'ERA5*' + file_type, recursive=True)
+    print(l)
+
+    # sort list
+    num_in_str = []
+
+    # TODO: split name automatically, rather than manually.
+    for i, file_path in enumerate(l):
+        year = file_path.split('_')[2]
+        month = file_path.split('_')[3]
+        num_in_str.append(int(year + month))
+
+    # index in order
+    indices = np.argsort(np.array(num_in_str))
+
+    # order list
+    sorted_l = [l[i] for i in indices]
+    return sorted_l
+
+
+def _get_task_from_regions(num_lat, num_lon, interval):
+    """Generate begin index of lat & lon"""
+    # config
+    lat = np.arange(0, num_lat-1, interval)
+    lon = np.arange(0, num_lon-1, interval)
+    # generate region
+    return [[int(lat[i]), int(lon[j])] for i in range(len(lat))
+            for j in range(len(lon))]
+
+
+def _get_nan_mask(y=None):
+    """"get mask image for NaN position of inputs."""
+    mask = np.full((y.shape[-2], y.shape[-1]), 0.0)
+
+    for i in range(y.shape[-2]):
+        for j in range(y.shape[-1]):
+            if np.isnan(y[:, i, j]).any():
+                mask[i, j] = np.nan
+    return mask
+
 
 def print_log():
     """Basic info"""

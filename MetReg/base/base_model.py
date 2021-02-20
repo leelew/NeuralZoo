@@ -1,7 +1,6 @@
 import six
 import abc
 
-
 @six.add_metaclass(abc.ABCMeta)
 class BaseModel():
 
@@ -9,14 +8,17 @@ class BaseModel():
         self.regressor = None
 
     @abc.abstractmethod
-    def fit(self, X, y): pass
+    def fit(self, X, y):
+        """Ensure all Machine learning model have `fit` methods"""
+        pass
 
     def predict(self, X):
+        """Predict for all Sklearn type models"""
         if self.regressor is None:
-            raise NotImplementedError('fit model before!')
+            raise NotImplementedError('Fit model before predict!')
         else:
             return self.regressor.predict(X)
 
-    def __repr__(self): pass
-
-    def get_hyperparameters_search_space(self): pass
+    def get_hyperparameters_search_space(self): 
+        #todo: autoML
+        pass

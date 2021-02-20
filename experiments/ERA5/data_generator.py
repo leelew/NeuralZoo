@@ -1,31 +1,12 @@
 import os
-import numpy as np
-from MetReg.data.data_generator import Data_generator
-from MetReg.data.data_preprocessor import Data_preprocessor
-from MetReg.utils.utils import save2pickle
 import sys
 sys.path.append('../../')
 
 
-def _get_task_from_regions(num_lat, num_lon, interval):
-    """Generate begin index of lat & lon"""
-    # config
-    lat = np.arange(0, num_lat-1, interval)
-    lon = np.arange(0, num_lon-1, interval)
-    # generate region
-    return [[int(lat[i]), int(lon[j])] for i in range(len(lat))
-            for j in range(len(lon))]
-
-
-def _get_nan_mask(y=None):
-    """"get mask image for NaN position of inputs."""
-    mask = np.full((y.shape[-2], y.shape[-1]), 0.0)
-
-    for i in range(y.shape[-2]):
-        for j in range(y.shape[-1]):
-            if np.isnan(y[:, i, j]).any():
-                mask[i, j] = np.nan
-    return mask
+import numpy as np
+from MetReg.data.data_generator import Data_generator
+from MetReg.data.data_preprocessor import Data_preprocessor
+from MetReg.utils.utils import save2pickle, _get_task_from_regions, _get_nan_mask
 
 
 def main(X,

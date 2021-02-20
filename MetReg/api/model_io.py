@@ -116,6 +116,9 @@ class ModelInterface():
         }
         return elm_hash[mdl_name]
 
+    def _get_dnn_mdl(self, mdl_name):
+        return
+
     def _get_rnn_mdl(self, mdl_name):
         rnn_hash = {
             'base': BaseRNNRegressor(),
@@ -139,21 +142,48 @@ class ModelInterface():
         }
         return convrnn_hash[mdl_name]
 
+    def _get_gan_mdl(self, mdl_name):
+        return
+
 
 class ModelSaver:
+    """Saving model of different types.
 
-    def __init__(self, mdl, mdl_name, dir_save, name_save):
+        Args:
+            mdl ([sklearn, keras, etc]):
+                target model for saving, it could be 2 different types,
+                1) sklearn for machine learning models. 
+                2) tensorflow models for deep learning models (global).
+            mdl_name (string): 
+                model name used for selecting types and generating saving path.
+            dir_save (string): 
+                dir for saving.
+            name_save (string): 
+                file name for saving.
+    """
+
+    def __init__(self, 
+                mdl, 
+                mdl_name, 
+                dir_save, 
+                name_save):
         self.mdl = mdl
         self.dir_save = dir_save
         self.name_save = name_save
         self.mdl_name = mdl_name
+        self.mdl_type = mdl_name.split('.')[0]
 
     def __call__(self):
         if not os.path.isdir(self.dir_save):
             os.mkdir(self.dir_save)
 
-        if self.mdl_name.split('.')[0] == 'ml':
+        if self.mdl_type == 'ml':
             pickle.dump(self.mdl, open(
                 self.dir_save + self.name_save+'.pickle', 'wb'))
-        else:
+        elif self.mdl_type == 'dl' or self.mdl_type == 'mdl':
             self.mdl.save(self.dir_save + self.name_save)
+        else:
+            raise IOError("Check model name, ensure it belong to \
+                          Machine Learning models, Deep Learing models \
+                          or Spatiotemporal Deep Learning models.")
+        

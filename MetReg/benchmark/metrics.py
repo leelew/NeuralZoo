@@ -198,14 +198,41 @@ class DefaultRegressionScore:
     def _cal_bias(self, y_true, y_pred):
         return Bias()._cal_bias(y_true, y_pred)
 
+    def _cal_wi(self, y_true, y_pred):
+        mean = np.mean(y_true)
+        wi_ = 1 - np.sum((y_true-y_pred)**2, axis=0)/ \
+            np.sum(abs(y_pred-mean)+abs(y_true-mean)**2)
+        return wi_
+
+    def _cal_r(self, y_true, y_pred):
+        m1, m2 = np.mean(y_true), np.mean(y_pred)
+        t1 = np.sqrt(np.sum((y_true-m1)**2))
+        r = np.sum((np.abs(y_true - m1) * np.abs(y_pred - m2))) / \
+            (np.sqrt(np.sum((y_true - m1) ** 2)) * np.sqrt(np.sum((y_pred - m2) ** 2)))
+        return r
+
+    def _cal_kge(self, y_true, y_pred):
+        r = self._cal_r(y_true, y_pred)
+        beta = np.mean(y_pred)/np.mean(y_true)
+        gamma = (np.std(y_pred)/np.mean(y_pred))/(np.std(y_true)/np.mean(y_true))
+        return 1-np.sqrt((r-1)**2+(beta-1)**2+(gamma-1)**2)
+
+    def _cal_mean(self, y_true, y_pred):
+        m1, m2 = np.mean(y_true), np.mean(y_pred)
+        return m1,m2
+    
     def cal(self, y_true, y_pred):
         
         bias = self._cal_bias(y_true, y_pred)
         rmse = self._cal_rmse(y_true, y_pred)
         nse = self._cal_nse(y_true, y_pred)
         r2 = self._cal_r2(y_true, y_pred)
+        wi = self._cal_wi(y_true, y_pred)
+        m1, m2 = self._cal_mean(y_true, y_pred)
+        kge = self._cal_kge(y_true, y_pred)
+        r = self._cal_r(y_true, y_pred)
 
-        return [bias, rmse, nse, r2]
+        return [bias, rmse, nse, r2, wi, kge, r, m1, m2]
 
 class CriterionScore(Bias):
     """support aic, aicc, bic, mallows cp indexs."""

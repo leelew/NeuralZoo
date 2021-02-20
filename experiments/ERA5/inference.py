@@ -1,12 +1,11 @@
 import argparse
 import pickle
-
+import sys
+sys.path.append('../../')
 import numpy as np
 import tensorflow as tf
 from MetReg.benchmark.benchmark import ScoreBoard
-
-from data_generator import _get_task_from_regions
-from train import _read_inputs
+from MetReg.utils.utils import _read_inputs,_get_task_from_regions
 
 
 def _predict_1task(X,
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
     config = parse.parse_args()
 
-    _predict(mdl_name=config.mdl_name)
+    #_predict(mdl_name=config.mdl_name)
     benchmark(mdl_name=config.mdl_name)
 
     """

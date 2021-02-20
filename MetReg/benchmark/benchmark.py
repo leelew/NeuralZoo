@@ -58,7 +58,7 @@ class ScoreBoard():
         else:
             drs = DefaultRegressionScore()
             _, Nlat, Nlon = y_true.shape
-            score_ = np.full((4, Nlat, Nlon), np.nan)
+            score_ = np.full((9, Nlat, Nlon), np.nan)
 
             for i in range(Nlat):
                 for j in range(Nlon):

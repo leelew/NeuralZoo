@@ -16,6 +16,7 @@ class BaseScore():
               y_pred,
               mass_weight=True):
         """Mean values over space of bias score.
+        
         Args:
             y_true, y_pred(nd.array):
                 shape of(timesteps, height, width)
@@ -29,9 +30,6 @@ class BaseScore():
             weight = np.mean(y_true, axis=0)
             score_ = np.mean(np.multiarray(score_, weight))
         return score_
-
-    def __repr__(self):
-        pass
 
     @staticmethod
     def _print_avg_metrics(metrics):
