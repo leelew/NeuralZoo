@@ -36,7 +36,7 @@ class LSTMRegressor(BaseRNNRegressor):
     def __init__(self):
         super().__init__()
 
-        self.lstm = layers.LSTM(units=64)
+        self.lstm = layers.LSTM(units=64, activation='relu')
         self.dense = layers.Dense(1)
 
     def call(self, inputs):

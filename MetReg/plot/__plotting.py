@@ -3,7 +3,7 @@ from __future__ import print_function
 import datetime as dt
 import itertools as it
 
-import daft
+#import daft
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
@@ -12,7 +12,7 @@ import pandas as pd
 import statsmodels.tsa.stattools as ts
 from matplotlib import rc
 from matplotlib.projections import PolarAxes
-from mpl_toolkits import Basemap
+#from mpl_toolkits import Basemap
 
 """plot default figures for testing, if you want to design your figure,pls
 see experiments folder."""
@@ -71,8 +71,53 @@ class Figure():
         pgm.savefig("pgm.pdf")
 
 
-def plot_taylor_diagram(stdev,
-                        corrcoeff,
+def plot_taylor_diag(std, corr, ref_std, normalized=True):
+
+    import mpl_toolkits.axisartist.grid_finder as gf
+    import mpl_toolkits.axisartist.floating_axes as fa
+
+    # define polar axes transform
+    tr = PolarAxes.PolarTransform()
+
+    # define correlation labels
+    rlocs = np.concatenate((np.arange(10)/10., [0.95, 0.99]))
+    tlocs = np.arccos(rlocs)
+    gl1 = gf.FixedLocator(tlocs)
+    tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+    smin = 0
+    smax = max(2.0, 1.1*std.max())
+
+    # add the curvilinear grid
+    fig = plt.figure()
+
+    ghelper = fa.GridHelperCurveLinear(tr,
+                                       extremes=(0, np.pi/2, smin, smax),
+                                       grid_locator1=gl1,
+                                       tick_formatter1=tf1)
+    ax = fa.FloatingSubplot(fig, 111, grid_helper=ghelper)
+    fig.add_subplot(ax)
+
+    # adjust axes
+    ax.axis["top"].set_axis_direction("bottom")
+    ax.axis["top"].toggle(ticklabels=True, label=True)
+    ax.axis["top"].major_ticklabels.set_axis_direction("top")
+    ax.axis["top"].label.set_axis_direction("top")
+    ax.axis["top"].label.set_text("Correlation")
+    ax.axis["left"].set_axis_direction("bottom")
+    if normalize:
+        ax.axis["left"].label.set_text("Normalized standard deviation")
+    else:
+        ax.axis["left"].label.set_text("Standard deviation")
+    ax.axis["right"].set_axis_direction("top")
+    ax.axis["right"].toggle(ticklabels=True)
+    ax.axis["right"].major_ticklabels.set_axis_direction("left")
+    ax.axis["bottom"].set_visible(False)
+    ax.grid(True)
+
+
+def plot_taylor_diagram(stddev,
+                        corrcoef,
                         refstd,
                         fig,
                         colors,
@@ -93,6 +138,10 @@ def plot_taylor_diagram(stdev,
         normalize : bool, optional
             disable to skip normalization of the standard deviation
     """
+
+    import mpl_toolkits.axisartist.grid_finder as GF
+    import mpl_toolkits.axisartist.floating_axes as FA
+
     # define transform
     tr = PolarAxes.PolarTransform()
 

@@ -14,13 +14,14 @@ from MetReg.models.ml.linear import (BaseLinearRegressor, ElasticRegressor,
                                      RidgeRegressor)
 from MetReg.models.ml.mlp import MLPRegressor
 from MetReg.models.ml.svr import LinearSVRegressor, SVRegressor
+"""
 from MetReg.models.ml.tree import (AdaptiveBoostingRegressor,
                                    BaseTreeRegressor, ExtraTreesRegressor,
                                    ExtremeGradientBoostingRegressor,
                                    GradientBoostingRegressor,
                                    LightGradientBoostingRegressor,
                                    RandomForestRegressor)
-
+"""
 os.environ['TP_CPP_MIN_LOG_LEVEL'] = '3'  # avoid logging print
 
 
@@ -162,11 +163,11 @@ class ModelSaver:
                 file name for saving.
     """
 
-    def __init__(self, 
-                mdl, 
-                mdl_name, 
-                dir_save, 
-                name_save):
+    def __init__(self,
+                 mdl,
+                 mdl_name,
+                 dir_save,
+                 name_save):
         self.mdl = mdl
         self.dir_save = dir_save
         self.name_save = name_save
@@ -177,13 +178,12 @@ class ModelSaver:
         if not os.path.isdir(self.dir_save):
             os.mkdir(self.dir_save)
 
-        if self.mdl_type == 'ml':
+        if self.mdl_type == 'ml' or self.mdl_type == 'dl':
             pickle.dump(self.mdl, open(
                 self.dir_save + self.name_save+'.pickle', 'wb'))
-        elif self.mdl_type == 'dl' or self.mdl_type == 'mdl':
+        elif self.mdl_type == 'mdl':
             self.mdl.save(self.dir_save + self.name_save)
         else:
             raise IOError("Check model name, ensure it belong to \
                           Machine Learning models, Deep Learing models \
                           or Spatiotemporal Deep Learning models.")
-        

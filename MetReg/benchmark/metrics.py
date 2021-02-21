@@ -195,7 +195,7 @@ class DefaultRegressionScore:
         nse_ = 1-(
             np.sum((y_true-y_pred)**2, axis=0)/np.sum((y_true-np.mean(y_true))**2))
         return nse_
-    
+
     def _cal_rmse(self, y_true, y_pred):
         return RMSE()._cal_rmse(y_true, y_pred)
 
@@ -204,7 +204,7 @@ class DefaultRegressionScore:
 
     def _cal_wi(self, y_true, y_pred):
         mean = np.mean(y_true)
-        wi_ = 1 - np.sum((y_true-y_pred)**2, axis=0)/ \
+        wi_ = 1 - np.sum((y_true-y_pred)**2, axis=0) / \
             np.sum(abs(y_pred-mean)+abs(y_true-mean)**2)
         return wi_
 
@@ -212,19 +212,24 @@ class DefaultRegressionScore:
         m1, m2 = np.mean(y_true), np.mean(y_pred)
         t1 = np.sqrt(np.sum((y_true-m1)**2))
         r = np.sum((np.abs(y_true - m1) * np.abs(y_pred - m2))) / \
-            (np.sqrt(np.sum((y_true - m1) ** 2)) * np.sqrt(np.sum((y_pred - m2) ** 2)))
+            (np.sqrt(np.sum((y_true - m1) ** 2))
+             * np.sqrt(np.sum((y_pred - m2) ** 2)))
         return r
 
     def _cal_kge(self, y_true, y_pred):
         r = self._cal_r(y_true, y_pred)
         beta = np.mean(y_pred)/np.mean(y_true)
-        gamma = (np.std(y_pred)/np.mean(y_pred))/(np.std(y_true)/np.mean(y_true))
+        gamma = (np.std(y_pred)/np.mean(y_pred)) / \
+            (np.std(y_true)/np.mean(y_true))
         return 1-np.sqrt((r-1)**2+(beta-1)**2+(gamma-1)**2)
 
     def _cal_mean(self, y_true, y_pred):
         m1, m2 = np.mean(y_true), np.mean(y_pred)
-        return m1,m2
+        return m1, m2
 
+    def _cal_std(self, y_true, y_pred):
+        std1, std2 = np.nanstd(y_true), np.nanstd(y_pred)
+        return std1, std2
 
     def _cal_score(self, y_true, y_pred):
         nse = self._cal_nse(y_true, y_pred)
@@ -233,11 +238,10 @@ class DefaultRegressionScore:
         rmse = RMSE()._cal_score_rmse(y_true, y_pred)
         kge = self._cal_kge(y_true, y_pred)
 
-        return (r+wi+kge+3*rmse+2*nse)/(1+1+1+3+2)
-
+        return (r+wi+kge+rmse+2*nse)/(1+1+1+1+2)
 
     def cal(self, y_true, y_pred):
-        
+
         bias = self._cal_bias(y_true, y_pred)
         rmse = self._cal_rmse(y_true, y_pred)
         nse = self._cal_nse(y_true, y_pred)
@@ -249,8 +253,10 @@ class DefaultRegressionScore:
         mae = self._cal_mae(y_true, y_pred)
         mse = self._cal_mse(y_true, y_pred)
         score = self._cal_score(y_true, y_pred)
+        std1, std2 = self._cal_std(y_true, y_pred)
 
-        return [bias, rmse, nse, r2, wi, kge, r, m1, m2, mae, mse, score]
+        return [bias, rmse, nse, r2, wi, kge, r, m1, m2, mae, mse, score, std1, std2]
+
 
 class CriterionScore(Bias):
     """support aic, aicc, bic, mallows cp indexs."""

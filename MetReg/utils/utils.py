@@ -21,13 +21,16 @@ from sklearn.metrics import (explained_variance_score, mean_absolute_error,
 
 import h5py
 
+
 def get_koppen_index():
     koppen_index = np.array(h5py.File('koppen_index.mat')['koppen_index']).T
-    koppen_index = np.concatenate((koppen_index[:,361:], koppen_index[:,:361]), axis=-1)
+    koppen_index = np.concatenate(
+        (koppen_index[:, 361:], koppen_index[:, :361]), axis=-1)
+
 
 def _read_inputs(task,
-                 input_path='/hard/lilu/ERA5_1981_2017_DD_A1/',
-                 mask_path='/hard/lilu/ERA5_1981_2017_DD_A1/',):
+                 input_path='/WORK/sysu_yjdai_6/hard/lilu/ERA5_1981_2017_DD_A1/',
+                 mask_path='/WORK/sysu_yjdai_6//hard/lilu/ERA5_1981_2017_DD_A1/',):
     # load pickle
     f = open(input_path + 'ERA5_DD_A1_case_' + str(task) + '.pickle', 'rb')
     inputs = pickle.load(f)
@@ -42,6 +45,7 @@ def _read_inputs(task,
     mask = pickle.load(f)
 
     return X_train, X_valid, y_train, y_valid, mask
+
 
 def _read_nc(file_path):
     """load and process single netcdf in ERA5 case.
