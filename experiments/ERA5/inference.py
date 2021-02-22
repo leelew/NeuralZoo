@@ -1,12 +1,12 @@
 import sys
 sys.path.append('../../')
 
-import pickle
-import argparse
-import numpy as np
-import tensorflow as tf
+from MetReg.utils.utils import _read_inputs, _get_task_from_regions, save2pickle
 from MetReg.benchmark.benchmark import ScoreBoard
-from MetReg.utils.utils import _read_inputs, _get_task_from_regions
+import tensorflow as tf
+import numpy as np
+import argparse
+import pickle
 
 
 """
@@ -109,20 +109,29 @@ def predict(mdl_name, input_path, forecast_path):
         y_true[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_true_ + \
             mask.reshape(1, 18, 18).repeat(N, axis=0)
 
-    np.save(mdl_name.split('.')[-1]+'_pred.npy', y_pred)
-    np.save(mdl_name.split('.')[-1]+'_true.npy', y_true)
+    save2pickle(y_pred,
+                out_path=forecast_path,
+                out_file=mdl_name.split('.')[-1] + '_pred.pickle')
+    save2pickle(y_true,
+                out_path=forecast_path,
+                out_file=mdl_name.split('.')[-1] + '_true.pickle')
 
 
 def benchmark(mdl_name,
               forecast_path,
               score_path):
 
-    y_pred = np.load(forecast_path+mdl_name.split('.')[-1]+'_pred.npy')
-    y_true = np.load(forecast_path+mdl_name.split('.')[-1]+'_true.npy')
+    f = open(forecast_path+mdl_name.split('.')[-1]+'_pred.pickle', 'rb')
+    y_pred = pickle.load(f)
+    f = open(forecast_path+mdl_name.split('.')[-1]+'_true.pickle', 'rb')
+    y_true = pickle.load(f)
 
     sb = ScoreBoard(mode=-1)
     score = sb.benchmark(y_true, y_pred)
-    np.save(score_path+mdl_name.split('.')[-1]+'_score.npy', score)
+
+    save2pickle(score,
+                out_path=score_path,
+                out_file=mdl_name.split('.')[-1] + '_score.pickle')
 
     #sb = ScoreBoard(mode=-1, overall_score=True)
     #score = sb.benchmark(y_true, y_pred)

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Notes:: This file execute models costing overwhelming time.
+#         i.e., SVM, RF, adaboost, gbdt
+
 # load module in TH-2
 source /WORK/app/toolshs/cnmodule.sh
 source /WORK/app/osenv/ln1/set2.sh

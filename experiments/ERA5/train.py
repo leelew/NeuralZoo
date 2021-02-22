@@ -1,11 +1,11 @@
 import sys
 sys.path.append('../../')
-
-from MetReg.utils.utils import _read_inputs, save2pickle
-from MetReg.api.model_io import ModelInterface, ModelSaver
-import numpy as np
-import argparse
+from sklearn.metrics import r2_score
 import pickle
+import argparse
+import numpy as np
+from MetReg.api.model_io import ModelInterface, ModelSaver
+from MetReg.utils.utils import _read_inputs, save2pickle
 
 
 
@@ -30,10 +30,16 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
         mdl.fit(X_train,
                 y_train[:, 0, :, :, :],
                 batch_size=batch_size,
-                epochs=epochs,
-                validation_split=0.2)
+                epochs=epochs)
+                #validation_split=0.1)
+        # validation_split=0.2)
         y_pred_ = mdl.predict(X_valid)
         y_valid_ = y_valid[:, 0, :, :, 0]
+
+        for i in range(H):
+            for j in range(W):
+                if not np.isnan(mask[i, j]):
+                    print(r2_score(y_valid_[:, i, j], y_pred_[:, i, j]))
 
         ModelSaver(mdl, mdl_name=mdl_name,
                    dir_save=model_path + mdl_name,
@@ -58,6 +64,8 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
                             X_valid[:, :, i, j, :].reshape(N_v, -1)))
                         y_valid_[:, i, j] = np.squeeze(y_valid[:, 0, i, j, 0])
 
+                        print(r2_score(y_valid_[:, i, j], y_pred_[:, i, j]))
+
                     elif mdl_name.split('.')[0] == 'dl':
 
                         if mdl_name.split('.')[1] in ['rnn', 'dnn']:
@@ -71,6 +79,9 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
                                 mdl.predict(X_valid[:, :, i, j, :]))
                             y_valid_[:, i, j] = np.squeeze(
                                 y_valid[:, 0, i, j, 0])
+
+                            print(
+                                r2_score(y_valid_[:, i, j], y_pred_[:, i, j]))
 
                         elif mdl_name.split('.')[1] == 'cnn':
                             mdl.compile(optimizer='adam', loss='mse')
@@ -104,21 +115,8 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
 
 
 if __name__ == "__main__":
-    import argparse
-    parse = argparse.ArgumentParser()
-
-    parse.add_argument('--mdl_name', type=str, default='ml.lr.ridge')
-    parse.add_argument('input_path', type=str,
-                       default='/hard/lilu/ERA5/7D/inputs/')
-    parse.add_argument('--forecast_path', type=str,
-                       default='/hard/lilu/ERA5/7D/forecast/')
-    parse.add_argument('--model_path', type=str,
-                       default='/hard/lilu/ERA5/7D/save/')
-    parse.add_argument('--batch_size', type=int, default=32)
-    parse.add_argument('--epochs', type=int, default=50)
-    parse.add_argument('--num_jobs', type=int, default=0)
-
-    config = parse.parse_args()
+    from parser import get_parse
+    config = get_parse()
 
     main(mdl_name=config.mdl_name,
          input_path=config.input_path,

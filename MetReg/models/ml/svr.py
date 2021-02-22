@@ -4,14 +4,15 @@ from MetReg.base.base_model import BaseModel
 import numpy as np
 np.random.seed(1)
 
+
 class LinearSVRegressor(BaseModel):
 
     def __init__(self,
-                 epsilon=0.0,
+                 epsilon=0.1,
                  loss='epsilon_insensitive',
                  dual=True,
                  tol=0.0001,
-                 C=1.0,
+                 C=10,
                  fit_intercept=True,
                  intercept_scaling=1.0,
                  random_state=None):

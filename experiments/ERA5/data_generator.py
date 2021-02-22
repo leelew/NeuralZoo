@@ -56,7 +56,10 @@ def main(X,
 
 if __name__ == "__main__":
 
-    preliminary_path = '/hard/lilu/ERA5/preliminary/'
+    from parser import get_parse
+    config = get_parse()
+
+    preliminary_path = config.preliminary_path
     st = np.load(preliminary_path+'ERA5_1981_2017_DD_A1_st_lv1.npy')
     swv = np.load(preliminary_path+'ERA5_1981_2017_DD_A1_swv_lv1.npy')
     mtpr = np.load(preliminary_path + 'ERA5_1981_2017_DD_A1_mtpr.npy')
@@ -69,8 +72,8 @@ if __name__ == "__main__":
 
     main(X,
          y,
-         input_path='/hard/lilu/ERA5/inputs/',
-         intervel=18,
-         len_inputs=10,
-         window_size=7,
+         input_path=config.input_path,
+         intervel=config.intervel,
+         len_inputs=config.len_inputs,
+         window_size=config.window_size,
          )
