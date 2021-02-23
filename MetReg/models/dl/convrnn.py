@@ -32,7 +32,7 @@ class BaseConvLSTMRegressor(Model):
             padding='same',
             activation='relu', return_sequences=False)
         #self.do = layers.Dropout(rate=0.1)
-        self.activation = layers.LeakyReLU(alpha=0.05)
+        #self.activation = layers.LeakyReLU(alpha=0.05)
 
     def call(self, inputs):
         #x = self.convlstm(inputs)
@@ -42,7 +42,7 @@ class BaseConvLSTMRegressor(Model):
 
         x = self.convlstm2(inputs)
         #x = self.activation(x)
-        x = self.bn1(x)
+        #x = self.bn1(x)
         x = self.dense2(x)
 
         return x
