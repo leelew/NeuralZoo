@@ -1,27 +1,44 @@
+from MetReg.train.train_dl import get_callback
+from MetReg.train.loss import MaskMSE, SSIM
+from MetReg.utils.utils import _read_inputs, save2pickle
+from MetReg.api.model_io import ModelInterface, ModelSaver
+import os
+import numpy as np
+import argparse
+import pickle
+from sklearn.metrics import r2_score
 import sys
 sys.path.append('../../')
-from sklearn.metrics import r2_score
-import pickle
-import argparse
-import numpy as np
-import os
-from MetReg.api.model_io import ModelInterface, ModelSaver
-from MetReg.utils.utils import _read_inputs, save2pickle
-from MetReg.train.loss import MaskMSE, SSIM
-from MetReg.train.train_dl import get_callback
+
+
+def main(mdl_name,
+         input_path,
+         model_path,
+         forecast_path,
+         batch_size,
+         epochs,
+         task=199):
+    X_train0, X_valid0, y_train0, y_valid0, mask0 = _read_inputs(
+        task=0,
+        input_path=input_path,
+        mask_path=input_path)
+    X_train1, X_valid1, y_train1, y_valid1, mask1 = _read_inputs(
+        task=1,
+        input_path=input_path,
+        mask_path=input_path)
+
+    np.con
 
 
 
-
-def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, task=199):
-
-    save_path = forecast_path + mdl_name + '/saved_model_' + str(task) + '.pickle'
+    save_path = forecast_path + mdl_name + \
+        '/saved_model_' + str(task) + '.pickle'
     print(save_path)
-    
+
     if os.path.exists(save_path):
         print('fuck')
-        return 'already train'
-    
+    #    return 'already train'
+
     # read inputs
     X_train, X_valid, y_train, y_valid, mask = _read_inputs(
         task=task,
@@ -149,10 +166,7 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
 
 if __name__ == "__main__":
     from parser import get_parse
-    import time
     config = get_parse()
-
-    a = time.time()
 
     main(mdl_name=config.mdl_name,
          input_path=config.input_path,
@@ -162,5 +176,3 @@ if __name__ == "__main__":
          epochs=config.epochs,
          task=config.num_jobs,
          )
-    b = time.time()
-    print(b-a)

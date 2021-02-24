@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 import seaborn as sns
+import pickle
+import sys
 
 
 def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
@@ -11,14 +13,15 @@ def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost'
                         file_type='.npy',
                         file_path='/hard/lilu/score/'):
 
-    score = np.full((len(mdl_list), 14, 150, 360), np.nan)
+    score = np.full((len(mdl_list), 14, 180, 360), np.nan)
 
     for i, mdl_name in enumerate(mdl_list):
         # generate score path of model
         path = file_path + mdl_name.lower() + '_score' + file_type
+        f = open(path, 'rb')
 
         # load score file
-        score[i, :, :, :] = np.load(path)[:, :150, :]
+        score[i, :, :, :] = pickle.load(f)  # np.load(path)
 
     score[:, :, 0:32, 299:346] = np.nan
     score[:, :, 0:18, 287:300] = np.nan
@@ -47,6 +50,9 @@ def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost'
     mae[r2 < 0] = np.nan
     mse[r2 < 0] = np.nan
     score_[r2 < 0] = np.nan
+    std1[r2 < 0] = np.nan
+    std2[r2 < 0] = np.nan
+
     r2[r2 < 0] = np.nan
 
     return bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_, std1, std2
@@ -65,7 +71,7 @@ def figure1(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
                         'red'],
             file_type='.npy',
             file_path='/hard/lilu/score/'):
-    bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_ = output_preprocessor(
+    bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_, std1, std2 = output_preprocessor(
         mdl_list=mdl_list,
         file_path=file_path,
         file_type=file_type)
@@ -174,7 +180,9 @@ def figure1(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
         for patch, color in zip(bplot['boxes'], color_list):
             patch.set_facecolor(color)
 
-    plt.savefig('/hard/lilu/boxplot_model_score.pdf')
+    plt.savefig('/Users/lewlee/Desktop/figure1.pdf')
+
+    # plt.savefig('/hard/lilu/boxplot_model_score.pdf')
 
 
 def figure3(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
@@ -299,6 +307,10 @@ def figure4(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
 
 
 if __name__ == '__main__':
-    # figure1()
+    figure1(mdl_list=['Ridge', 'KNN', 'ELM', 'Xgboost', 'LightGBM'],
+            color_list=['pink', 'lightblue', 'yellow', 'lightgreen',
+                        'lightgreen'],
+            file_type='.pickle',
+            file_path='/Users/lewlee/Desktop/MetReg/experiments/ERA5/score/15D/')
     # figure3()
-    figure4()
+    # figure4()

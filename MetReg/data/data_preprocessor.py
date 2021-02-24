@@ -89,6 +89,9 @@ class Data_preprocessor():
         else:
             pass
 
+    def _cluster(self):
+        pass
+
     def __call__(self):
         """Exec preprocessing process"""
         # (TODO)@lilu: check X,y
@@ -135,7 +138,6 @@ class Data_preprocessor():
             'normalize_method': 'min max scaler',
             'fill_value': self.fill_value
         }
-
 
 
 if __name__ == "__main__":

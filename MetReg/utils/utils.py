@@ -13,7 +13,7 @@ import os
 import pickle
 import time
 import glob
-import netCDF4
+#import netCDF4
 import numpy as np
 from sklearn.metrics import (explained_variance_score, mean_absolute_error,
                              mean_squared_error, median_absolute_error,

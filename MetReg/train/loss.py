@@ -41,3 +41,12 @@ class MaskMSE(tf.keras.losses.Loss):
         mse2 = tf.math.multiply(mse2, self.na_mask)
 
         return tf.math.reduce_mean(mse2)
+
+
+class SSIM(tf.keras.losses.Loss):
+
+    def __init__(self, name='SSIM'):
+        super().__init__(name=name)
+
+    def call(self, y_true, y_pred):
+        return 1 - tf.math.reduce_mean(tf.image.ssim(y_true, y_pred, max_val=1.0))

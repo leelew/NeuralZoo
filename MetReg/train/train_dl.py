@@ -30,7 +30,9 @@ def get_callback(save_path, task):
         tf.keras.callbacks.ModelCheckpoint(
             checkpoint_path,
             save_best_only=True,
-            save_weights_only=True,)
+            save_weights_only=True,
+            monitor='loss'),
+        tf.keras.callbacks.ReduceLROnPlateau(monitor='loss')
         # monitor='')
     ]
     return callbacks
