@@ -6,6 +6,9 @@ from MetReg.models.dl.layers.attention import (FeatureAttention,
 from MetReg.models.dl.layers.trajgru import TrajGRU
 from tensorflow.keras import Model, Sequential, activations, layers
 
+np.random.seed(1)
+tf.compat.v1.set_random_seed(13)
+
 
 class BaseConvLSTMRegressor(Model):
 

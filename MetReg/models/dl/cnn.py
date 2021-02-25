@@ -13,16 +13,34 @@ class BaseCNNRegressor(Model):
 
     def __init__(self):
         super().__init__()
-        self.cnn = layers.Conv2D(
-            filters=16,
+        self.cnn3 = layers.Conv2D(
+            filters=128,
             kernel_size=(3, 3),
-            activation='tanh',
+            activation='relu',
             padding='same')
-        self.dense = layers.Dense(1)
+
+        self.cnn4 = layers.Conv2D(
+            filters=64,
+            kernel_size=(3, 3),
+            activation='relu',
+            padding='same')
+
+        self.cnn5 = layers.Conv2D(
+            filters=32,
+            kernel_size=(3, 3),
+            activation='relu',
+            padding='same')
+
+        self.dense5 = layers.Dense(1)
 
     def call(self, inputs):
-        x = self.cnn(inputs)
-        return self.dense(x)
+
+        x = self.cnn3(inputs)
+        x = self.cnn4(x)
+        x = self.cnn5(x)
+        x = self.dense5(x)
+
+        return x
 
 
 class LeNet(Model):

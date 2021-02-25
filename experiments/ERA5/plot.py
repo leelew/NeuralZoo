@@ -25,6 +25,7 @@ def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost'
 
     score[:, :, 0:32, 299:346] = np.nan
     score[:, :, 0:18, 287:300] = np.nan
+    score[:, :, 150:, :] = np.nan
 
     bias = score[:, 0, :, :]
     rmse = score[:, 1, :, :]
@@ -306,10 +307,25 @@ def figure4(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
     plt.savefig('/hard/lilu/kde.pdf')
 
 
+def select_best_model(metrics):
+    """Get best model of models list."""
+    H = metrics.shape[-2]
+    W = metrics.shape[-1]
+
+    loc = np.full((H, W), np.nan)
+
+    for i in range(H):
+        for j in range(W):
+            if not np.isnan(metrics[:, i, j]).any():
+                loc[i, j] = np.argmax(metrics[:, i, j])
+
+    return loc
+
+
 if __name__ == '__main__':
-    figure1(mdl_list=['Ridge', 'KNN', 'ELM', 'Xgboost', 'LightGBM'],
-            color_list=['pink', 'lightblue', 'yellow', 'lightgreen',
-                        'lightgreen'],
+    figure1(mdl_list=['Ridge', 'KNN', 'ELM', 'Adaboost', 'GBDT', 'RF', 'Xgboost', 'LightGBM', 'RNN', 'GRU', 'LSTM'],
+            color_list=['pink', 'lightblue', 'yellow', 'lightgreen', 'lightgreen', 'lightgreen', 'lightgreen',
+                        'lightgreen', 'red', 'red', 'red'],
             file_type='.pickle',
             file_path='/Users/lewlee/Desktop/MetReg/experiments/ERA5/score/15D/')
     # figure3()

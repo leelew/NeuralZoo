@@ -14,7 +14,6 @@ import warnings
 
 import numpy as np
 import tensorflow as tf
-from metrics import Metrics
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import (BatchNormalization, Conv2D, ConvLSTM2D,
                                      Dense, Flatten)
@@ -33,7 +32,7 @@ class GAN_ConvLSTM():
     generator and simple NN as discriminator.
     """
 
-    def __init__(self, epochs=20):
+    def __init__(self, epochs=50):
         if isinstance(epochs, float):
             epochs = int(epochs)
         self.epochs = epochs
@@ -52,7 +51,7 @@ class GAN_ConvLSTM():
                        kernel_size=(3, 3),
                        padding='same',
                        activation='relu',
-                       input_shape=(10, 8, 8, 3)))
+                       input_shape=(10, 18, 18, 4)))
         # mdl.add(BatchNormalization())
 
         mdl.add(Dense(units=1))
@@ -76,7 +75,7 @@ class GAN_ConvLSTM():
         mdl.add(Flatten())
         mdl.add(Dense(units=1))
         """
-        mdl.build((None, 8, 8, 1))
+        mdl.build((None, 18, 18, 1))
         mdl.summary()
 
         return mdl
@@ -138,7 +137,7 @@ class GAN_ConvLSTM():
         S, T, H, W, F = x_train.shape
 
         train_ds = np.concatenate(
-            [x_train.reshape(S, H, W, T * F), y_train[:, :, :, np.newaxis]],
+            [x_train.reshape(S, H, W, T * F), y_train[:, 0, :, :, :]],
             axis=-1)
         np.random.shuffle(train_ds)
 
@@ -153,13 +152,8 @@ class GAN_ConvLSTM():
             for x, y in train_dataset:
 
                 self.train_step(self.gen, self.disc, self.optimizer, x, y)
-
-    def evaluate(self, x_valid, y_valid):
-
-        y_predict = self.gen.predict(x_valid)
-        Metrics(y_valid, y_predict).get_sklearn_metrics(y_valid, y_predict)
+        return self.gen
 
 
 if __name__ == "__main__":
-
-    GAN_ConvLSTM()
+    pass

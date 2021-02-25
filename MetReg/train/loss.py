@@ -50,3 +50,25 @@ class SSIM(tf.keras.losses.Loss):
 
     def call(self, y_true, y_pred):
         return 1 - tf.math.reduce_mean(tf.image.ssim(y_true, y_pred, max_val=1.0))
+
+
+def G_loss(y_truth, G_pred, D_pred):
+    """generator loss construct of square-error loss
+    """
+    G_mse_loss = MeanSquaredError()(y_truth, G_pred)
+    G_bce_loss = BinaryCrossentropy()(tf.zeros_like(D_pred), D_pred)
+    # print(tf.print(G_mse_loss))
+    # print(tf.print(G_bce_loss))
+    return G_mse_loss - 0.0003*G_bce_loss
+
+
+def D_loss(D_truth, D_pred):
+    """discriminator loss
+
+    Args:
+        D_truth ([type]): [description]
+        D_pred ([type]): [description]
+    """
+    D_truth_loss = BinaryCrossentropy()(tf.ones_like(D_truth), D_truth)
+    D_pred_loss = BinaryCrossentropy()(tf.zeros_like(D_pred), D_pred)
+    return D_truth_loss + D_pred_loss

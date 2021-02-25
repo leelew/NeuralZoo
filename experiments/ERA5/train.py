@@ -9,8 +9,8 @@ from MetReg.api.model_io import ModelInterface, ModelSaver
 from MetReg.utils.utils import _read_inputs, save2pickle
 from MetReg.train.loss import MaskMSE, SSIM
 from MetReg.train.train_dl import get_callback
-
-
+from MetReg.models.dl.layers.gan import GAN_ConvLSTM
+np.random.seed(1)
 
 
 def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, task=199):
@@ -20,7 +20,7 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
     
     if os.path.exists(save_path):
         print('fuck')
-        return 'already train'
+        #return 'already train'
     
     # read inputs
     X_train, X_valid, y_train, y_valid, mask = _read_inputs(
@@ -40,6 +40,23 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
                 y_train[:, 0, i, j, 0] = np.zeros((N_t,))
                 y_valid[:, 0, i, j, 0] = np.zeros((N_v,))
     """
+    if mdl_name.split('.')[1] == 'gan':
+        mdl = GAN_ConvLSTM().train(X_train, y_train)
+
+        y_pred_ = mdl.predict(X_valid)
+        y_valid_ = y_valid[:, 0, :, :, 0]
+
+        _, _, _, _, mask = _read_inputs(
+            task=task,
+            input_path=input_path,
+            mask_path=input_path)
+        print(mask)
+        for i in range(H):
+            for j in range(W):
+                if not np.isnan(mask[i, j]):
+                    print(r2_score(y_valid_[:, i, j], y_pred_[:, i, j]))
+        return '1'
+
     # train & save model
     if mdl_name.split('.')[0] == 'sdl':
 
