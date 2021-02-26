@@ -1,16 +1,4 @@
-# -----------------------------------------------------------------------------
-#              General Advertisal Network Model Repository (GANMR)            #
-# -----------------------------------------------------------------------------
-# author: Lu Li                                                               #
-# mail: lilu35@mail2.sysu.edu.cn                                              #
-# -----------------------------------------------------------------------------
-# This Repo                                                                   #
-# -----------------------------------------------------------------------------
-
 from __future__ import print_function
-
-import abc
-import warnings
 
 import numpy as np
 import tensorflow as tf
@@ -32,7 +20,7 @@ class GAN_ConvLSTM():
     generator and simple NN as discriminator.
     """
 
-    def __init__(self, epochs=50):
+    def __init__(self, epochs=70):
         if isinstance(epochs, float):
             epochs = int(epochs)
         self.epochs = epochs
@@ -46,12 +34,14 @@ class GAN_ConvLSTM():
     def generator(self):
 
         mdl = Sequential()
+
         mdl.add(
             ConvLSTM2D(filters=16,
                        kernel_size=(3, 3),
                        padding='same',
                        activation='relu',
                        input_shape=(10, 18, 18, 4)))
+
         # mdl.add(BatchNormalization())
 
         mdl.add(Dense(units=1))

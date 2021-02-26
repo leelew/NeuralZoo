@@ -1,27 +1,34 @@
 import sys
+
 sys.path.append('../../')
+
+
+
 from sklearn.metrics import r2_score
-import pickle
-import argparse
-import numpy as np
-import os
-from MetReg.api.model_io import ModelInterface, ModelSaver
 from MetReg.utils.utils import _read_inputs, save2pickle
-from MetReg.train.loss import MaskMSE, SSIM
 from MetReg.train.train_dl import get_callback
+from MetReg.train.loss import SSIM, MaskMSE
 from MetReg.models.dl.layers.gan import GAN_ConvLSTM
+from MetReg.api.model_io import ModelInterface, ModelSaver
+import numpy as np
+import pickle
+import os
+import argparse
+
+
 np.random.seed(1)
 
 
 def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, task=199):
 
-    save_path = forecast_path + mdl_name + '/saved_model_' + str(task) + '.pickle'
+    save_path = forecast_path + mdl_name + \
+        '/saved_model_' + str(task) + '.pickle'
     print(save_path)
-    
+
     if os.path.exists(save_path):
         print('fuck')
-        #return 'already train'
-    
+        # return 'already train'
+
     # read inputs
     X_train, X_valid, y_train, y_valid, mask = _read_inputs(
         task=task,
@@ -40,7 +47,7 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
                 y_train[:, 0, i, j, 0] = np.zeros((N_t,))
                 y_valid[:, 0, i, j, 0] = np.zeros((N_v,))
     """
-    if mdl_name.split('.')[1] == 'gan':
+    if mdl_name.split('.')[0] == 'gan':
         mdl = GAN_ConvLSTM().train(X_train, y_train)
 
         y_pred_ = mdl.predict(X_valid)
@@ -55,7 +62,6 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
             for j in range(W):
                 if not np.isnan(mask[i, j]):
                     print(r2_score(y_valid_[:, i, j], y_pred_[:, i, j]))
-        return '1'
 
     # train & save model
     if mdl_name.split('.')[0] == 'sdl':
@@ -155,18 +161,18 @@ def main(mdl_name, input_path, model_path, forecast_path, batch_size, epochs, ta
         except:
             print("Don't have saving model mode!")
 
-        log = dict()
-        log['y_pred'] = y_pred_
-        log['y_valid'] = y_valid_
+    log = dict()
+    log['y_pred'] = y_pred_
+    log['y_valid'] = y_valid_
 
-        save2pickle(log,
-                    out_path=forecast_path + mdl_name,
-                    out_file='/saved_model_' + str(task) + '.pickle')
+    save2pickle(log,
+                out_path=forecast_path + mdl_name,
+                out_file='/saved_model_' + str(task) + '.pickle')
 
 
 if __name__ == "__main__":
-    from parser import get_parse
     import time
+    from parser import get_parse
     config = get_parse()
 
     a = time.time()

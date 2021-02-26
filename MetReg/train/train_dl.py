@@ -36,3 +36,12 @@ def get_callback(save_path, task):
         # monitor='')
     ]
     return callbacks
+
+
+class Trainer():
+
+    def __init__(self):
+        pass
+
+    def 
+

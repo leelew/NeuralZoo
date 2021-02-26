@@ -1,32 +1,39 @@
-# from mpl_toolkits.basemap import Basemap
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
+
+try:
+    from mpl_toolkits.basemap import Basemap
+except:
+    print('Install `basemap` library first!')
 import glob
-import seaborn as sns
 import pickle
 import sys
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
-def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
-                                  'GBDT', 'Xgboost', 'LightGBM', 'ConvLSTM'],
-                        file_type='.npy',
-                        file_path='/hard/lilu/score/'):
 
-    score = np.full((len(mdl_list), 14, 180, 360), np.nan)
+def output_preprocessor(
+        mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
+                  'GBDT', 'Xgboost', 'LightGBM', 'ConvLSTM'],
+        file_path='/hard/lilu/score/',
+        num_metrics=14):
+    # init score matrix
+    score = np.full((len(mdl_list), num_metrics, 180, 360), np.nan)
 
     for i, mdl_name in enumerate(mdl_list):
         # generate score path of model
-        path = file_path + mdl_name.lower() + '_score' + file_type
+        path = file_path + mdl_name.lower() + '_score' + '.pickle'
         f = open(path, 'rb')
-
         # load score file
-        score[i, :, :, :] = pickle.load(f)  # np.load(path)
+        score[i, :, :, :] = pickle.load(f)
 
+    # remove polar
     score[:, :, 0:32, 299:346] = np.nan
     score[:, :, 0:18, 287:300] = np.nan
-    score[:, :, 150:, :] = np.nan
+    #dscore[:, :, 150:, :] = np.nan
 
+    # generate metrics
     bias = score[:, 0, :, :]
     rmse = score[:, 1, :, :]
     nse = score[:, 2, :, :]
@@ -42,6 +49,7 @@ def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost'
     std1 = score[:, 12, :, :]
     std2 = score[:, 13, :, :]
 
+    # remove bad grids.
     bias[r2 < 0] = np.nan
     nse[r2 < 0] = np.nan
     rmse[r2 < 0] = np.nan
@@ -53,7 +61,6 @@ def output_preprocessor(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost'
     score_[r2 < 0] = np.nan
     std1[r2 < 0] = np.nan
     std2[r2 < 0] = np.nan
-
     r2[r2 < 0] = np.nan
 
     return bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_, std1, std2
@@ -65,17 +72,14 @@ def get_na_mask_data(data):
     return data
 
 
-def figure1(mdl_list=['Ridge', 'KNN', 'SVM', 'ELM', 'RF', 'Adaboost',
-                      'GBDT', 'Xgboost', 'LightGBM', 'ConvLSTM'],
-            color_list=['pink', 'lightblue', 'gray', 'yellow', 'lightgreen',
-                        'lightgreen', 'lightgreen', 'lightgreen', 'lightgreen',
-                        'red'],
-            file_type='.npy',
-            file_path='/hard/lilu/score/'):
-    bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_, std1, std2 = output_preprocessor(
-        mdl_list=mdl_list,
-        file_path=file_path,
-        file_type=file_type)
+def figure1(
+        mdl_list=None,
+        color_list=None,
+        file_path='/hard/lilu/score/'):
+    bias, rmse, nse, wi, kge, r, m1, m2, mae, mse, score_, std1, std2 = \
+        output_preprocessor(
+            mdl_list=mdl_list,
+            file_path=file_path)
 
     # boxplot
     plt.figure(figsize=(20, 11))
@@ -323,10 +327,11 @@ def select_best_model(metrics):
 
 
 if __name__ == '__main__':
-    figure1(mdl_list=['Ridge', 'KNN', 'ELM', 'Adaboost', 'GBDT', 'RF', 'Xgboost', 'LightGBM', 'RNN', 'GRU', 'LSTM'],
-            color_list=['pink', 'lightblue', 'yellow', 'lightgreen', 'lightgreen', 'lightgreen', 'lightgreen',
-                        'lightgreen', 'red', 'red', 'red'],
-            file_type='.pickle',
-            file_path='/Users/lewlee/Desktop/MetReg/experiments/ERA5/score/15D/')
+    figure1(
+        mdl_list=['Ridge', 'KNN', 'ELM', 'Adaboost', 'GBDT',
+                  'Xgboost', 'LightGBM', 'RNN', 'GRU', 'LSTM'],
+        color_list=['pink', 'lightblue', 'yellow', 'lightgreen', 'lightgreen', 'lightgreen',
+                    'lightgreen', 'red', 'red', 'red'],
+        file_path='/Users/lewlee/Desktop/MetReg/experiments/ERA5/score/7D/')
     # figure3()
     # figure4()

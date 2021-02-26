@@ -1,61 +1,15 @@
+import argparse
+import pickle
 import sys
 sys.path.append('../../')
 
-from MetReg.utils.utils import _read_inputs, _get_task_from_regions, save2pickle
-from MetReg.benchmark.benchmark import ScoreBoard
-import tensorflow as tf
 import numpy as np
-import argparse
-import pickle
+import tensorflow as tf
+from MetReg.benchmark.benchmark import ScoreBoard
+from MetReg.utils.utils import (_get_task_from_regions, _read_inputs,
+                                save2pickle)
 
-
-"""
-def _predict_1task(X,
-                   y,
-                   task,
-                   mdl_name,
-                   save_path,):
-    # shape
-    N, _, nlat, nlon, _ = y.shape
-
-    # init
-    y_pred = np.full((N, nlat, nlon), np.nan)
-
-    if mdl_name.split('.')[0] == 'ml':
-        f = open(save_path + mdl_name + '/saved_model_' +
-                 str(task) + '.pickle', 'rb')
-        saved_model = pickle.load(f)
-
-        # predict
-        for i in range(nlat):
-            for j in range(nlon):
-                mdl = saved_model[i][j]
-                if mdl is not None:
-                    y_pred[:, i, j] = mdl.predict(
-                        X[:, :, i, j, :].reshape(N, -1))
-
-    elif mdl_name.split('.')[0] == 'sdl':
-
-        mdl = tf.keras.models.load_model(
-            save_path+mdl_name+'/saved_model_'+str(task))
-        y_pred = np.squeeze(mdl.predict(X))
-
-    else:
-
-        f = open(save_path + mdl_name + '/saved_model_' +
-                 str(task) + '.pickle', 'rb')
-        log = pickle.load(f)
-        y_pred = log['y_pred']
-        y_true = log['y_valid']
-
-        return y_pred, y_true
-
-    y_true = y.reshape(N, nlat, nlon)
-
-    return y_pred, y_true
-
-
-"""
+def ensemble(): pass
 
 
 def process(mdl_name, forecast_path, task, threshold=0):
@@ -98,16 +52,19 @@ def predict(mdl_name, input_path, forecast_path):
     for num_jobs, attr in enumerate(region):
 
         print('now processing jobs {}'.format(num_jobs))
-        X_train, X_valid, y_train, y_valid, mask = _read_inputs(
-            task=num_jobs, input_path=input_path, mask_path=input_path)
+        try:
+            X_train, X_valid, y_train, y_valid, mask = _read_inputs(
+                task=num_jobs, input_path=input_path, mask_path=input_path)
 
-        y_pred_, y_true_ = process(
-            mdl_name=mdl_name, forecast_path=forecast_path,
-            task=num_jobs, threshold=0)
-        y_pred[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_pred_ + \
-            mask.reshape(1, 18, 18).repeat(N, axis=0)
-        y_true[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_true_ + \
-            mask.reshape(1, 18, 18).repeat(N, axis=0)
+            y_pred_, y_true_ = process(
+                mdl_name=mdl_name, forecast_path=forecast_path,
+                task=num_jobs, threshold=0)
+            y_pred[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_pred_ + \
+                mask.reshape(1, 18, 18).repeat(N, axis=0)
+            y_true[:, attr[0]:attr[0]+18, attr[1]:attr[1]+18] = y_true_ + \
+                mask.reshape(1, 18, 18).repeat(N, axis=0)
+        except:
+            print("{} job is not trained".format(num_jobs))
 
     save2pickle(y_pred,
                 out_path=forecast_path,
