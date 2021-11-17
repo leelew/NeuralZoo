@@ -10,26 +10,22 @@ from tensorflow.keras.models import Sequential
 
 
 class BaseCNNRegressor(Model):
-
     def __init__(self):
         super().__init__()
-        self.cnn3 = layers.Conv2D(
-            filters=128,
-            kernel_size=(3, 3),
-            activation='relu',
-            padding='same')
+        self.cnn3 = layers.Conv2D(filters=128,
+                                  kernel_size=(3, 3),
+                                  activation='relu',
+                                  padding='same')
 
-        self.cnn4 = layers.Conv2D(
-            filters=64,
-            kernel_size=(3, 3),
-            activation='relu',
-            padding='same')
+        self.cnn4 = layers.Conv2D(filters=64,
+                                  kernel_size=(3, 3),
+                                  activation='relu',
+                                  padding='same')
 
-        self.cnn5 = layers.Conv2D(
-            filters=32,
-            kernel_size=(3, 3),
-            activation='relu',
-            padding='same')
+        self.cnn5 = layers.Conv2D(filters=32,
+                                  kernel_size=(3, 3),
+                                  activation='relu',
+                                  padding='same')
 
         self.dense5 = layers.Dense(1)
 
@@ -47,16 +43,17 @@ class LeNet(Model):
     """default CNN, created by Yann LeCun.
         https://www.mitpressjournals.org/doi/abs/10.1162/neco.1989.1.4.541
     """
-
     def __init__(self):
         self.cnn1 = layers.Conv2D(
             filters=6,
             kernel_size=5,
-            activation='sigmoid',)
+            activation='sigmoid',
+        )
         self.avgpool1 = layers.AvgPool2D(pool_size=2, strides=2)
 
-        self.cnn2 = layers.Conv2D(
-            filters=16, kernel_size=5, activation='sigmoid')
+        self.cnn2 = layers.Conv2D(filters=16,
+                                  kernel_size=5,
+                                  activation='sigmoid')
         self.avgpool2 = layers.AvgPool2D(pool_size=2, strides=2)
         self.flat = layers.Flatten()
         self.dense1 = layers.Dense(120, activation='sigmoid')
@@ -82,7 +79,6 @@ class vanilla():
     Returns:
 
     """
-
     def __init__(self):
         pass
 
@@ -95,18 +91,34 @@ class vanilla():
 
         model = tf.keras.models.Sequential()
         # if you want to test MNIST, you must changed picture to (224,224).
-        model.add(tf.keras.layers.Conv2D(filters=96, kernel_size=11, strides=4,
-                                         activation='relu', input_shape=[128, 128, 1]))
+        model.add(
+            tf.keras.layers.Conv2D(filters=96,
+                                   kernel_size=11,
+                                   strides=4,
+                                   activation='relu',
+                                   input_shape=[128, 128, 1]))
         model.add(tf.keras.layers.MaxPool2D(pool_size=3, strides=2))
-        model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=5, padding='same',
-                                         activation='relu'))
+        model.add(
+            tf.keras.layers.Conv2D(filters=256,
+                                   kernel_size=5,
+                                   padding='same',
+                                   activation='relu'))
         model.add(tf.keras.layers.MaxPool2D(pool_size=3, strides=2))
-        model.add(tf.keras.layers.Conv2D(filters=384, kernel_size=5, padding='same',
-                                         activation='relu'))
-        model.add(tf.keras.layers.Conv2D(filters=384, kernel_size=5, padding='same',
-                                         activation='relu'))
-        model.add(tf.keras.layers.Conv2D(filters=256, kernel_size=5, padding='same',
-                                         activation='relu'))
+        model.add(
+            tf.keras.layers.Conv2D(filters=384,
+                                   kernel_size=5,
+                                   padding='same',
+                                   activation='relu'))
+        model.add(
+            tf.keras.layers.Conv2D(filters=384,
+                                   kernel_size=5,
+                                   padding='same',
+                                   activation='relu'))
+        model.add(
+            tf.keras.layers.Conv2D(filters=256,
+                                   kernel_size=5,
+                                   padding='same',
+                                   activation='relu'))
         model.add(tf.keras.layers.MaxPool2D(pool_size=3, strides=2))
         model.add(tf.keras.layers.Flatten())
         model.add(tf.keras.layers.Dense(4096, activation='relu'))
@@ -143,9 +155,11 @@ class vanilla():
     def vgg_block(self, num_convs, num_channels):
         model = tf.keras.models.Sequential()
         for _ in range(num_convs):
-            model.add(tf.keras.layers.Conv2D(num_channels,
-                                             kernel_size=3, padding='same',
-                                             activation='relu'))
+            model.add(
+                tf.keras.layers.Conv2D(num_channels,
+                                       kernel_size=3,
+                                       padding='same',
+                                       activation='relu'))
         model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
         return model
 
@@ -173,13 +187,20 @@ class vanilla():
     def nin_block(self, num_channels, kernel_size, strides, padding):
 
         nin = tf.keras.models.Sequential()
-        nin.add(tf.keras.layers.Conv2D(num_channels, kernel_size,
-                                       strides=strides, padding=padding,
-                                       activation='relu'))
-        nin.add(tf.keras.layers.Conv2D(
-            num_channels, kernel_size=1, activation='relu'))
-        nin.add(tf.keras.layers.Conv2D(
-            num_channels, kernel_size=1, activation='relu'))
+        nin.add(
+            tf.keras.layers.Conv2D(num_channels,
+                                   kernel_size,
+                                   strides=strides,
+                                   padding=padding,
+                                   activation='relu'))
+        nin.add(
+            tf.keras.layers.Conv2D(num_channels,
+                                   kernel_size=1,
+                                   activation='relu'))
+        nin.add(
+            tf.keras.layers.Conv2D(num_channels,
+                                   kernel_size=1,
+                                   activation='relu'))
 
         return nin
 
@@ -190,25 +211,34 @@ class vanilla():
         """
 
         model01 = tf.keras.models.Sequential()
-        model01.add(tf.keras.layers.Conv2D(64, kernel_size=7,
-                                           strides=2, padding='same',
-                                           activation='relu'))
-        model01.add(tf.keras.layers.MaxPool2D(
-            pool_size=3, strides=2, padding='same'))
+        model01.add(
+            tf.keras.layers.Conv2D(64,
+                                   kernel_size=7,
+                                   strides=2,
+                                   padding='same',
+                                   activation='relu'))
+        model01.add(
+            tf.keras.layers.MaxPool2D(pool_size=3, strides=2, padding='same'))
 
         model02 = tf.keras.models.Sequential()
-        model02.add(tf.keras.layers.Conv2D(
-            64, kernel_size=1, padding='same', activation='relu'))
-        model02.add(tf.keras.layers.Conv2D(
-            192, kernel_size=3, padding='same', activation='relu'))
-        model02.add(tf.keras.layers.MaxPool2D(
-            pool_size=3, strides=2, padding='same'))
+        model02.add(
+            tf.keras.layers.Conv2D(64,
+                                   kernel_size=1,
+                                   padding='same',
+                                   activation='relu'))
+        model02.add(
+            tf.keras.layers.Conv2D(192,
+                                   kernel_size=3,
+                                   padding='same',
+                                   activation='relu'))
+        model02.add(
+            tf.keras.layers.MaxPool2D(pool_size=3, strides=2, padding='same'))
 
         model03 = tf.keras.models.Sequential()
         model03.add(inception(64, (96, 128), (16, 32), 32))
         model03.add(inception(128, (128, 192), (32, 96), 64))
-        model03.add(tf.keras.layers.MaxPool2D(
-            pool_size=3, strides=2, padding='same'))
+        model03.add(
+            tf.keras.layers.MaxPool2D(pool_size=3, strides=2, padding='same'))
 
         model04 = tf.keras.models.Sequential()
         model04.add(inception(192, (96, 208), (16, 48), 64))
@@ -216,64 +246,37 @@ class vanilla():
         model04.add(inception(128, (128, 256), (24, 64), 64))
         model04.add(inception(112, (144, 288), (32, 64), 64))
         model04.add(inception(256, (160, 320), (32, 128), 128))
-        model04.add(tf.keras.layers.MaxPool2D(
-            pool_size=3, strides=2, padding='same'))
+        model04.add(
+            tf.keras.layers.MaxPool2D(pool_size=3, strides=2, padding='same'))
 
         model05 = tf.keras.models.Sequential()
         model05.add(inception(256, (160, 320), (32, 128), 128))
         model05.add(inception(384, (192, 384), (48, 128), 128))
         model05.add(tf.keras.layers.GlobalAvgPool2D())
 
-        googlenet = tf.keras.models.Sequential([model01, model02, model03, model04, model05,
-                                                tf.keras.layers.Dense(10)])
+        googlenet = tf.keras.models.Sequential([
+            model01, model02, model03, model04, model05,
+            tf.keras.layers.Dense(10)
+        ])
         googlenet.build([None, 128, 128, 1])
 
         return googlenet
-
-    def ResNet(self):
-        """https: // arxiv.org/pdf/1512.03385.pdf
-        """
-        resnet = tf.keras.models.Sequential()
-        resnet.add(tf.keras.layers.Conv2D(
-            64, kernel_size=7, strides=2, padding='same'))
-        resnet.add(tf.keras.layers.BatchNormalization())
-        resnet.add(tf.keras.layers.Activation('relu'))
-        resnet.add(tf.keras.layers.MaxPool2D(
-            pool_size=3, strides=2, padding='same'))
-
-        resnet.add(self.resid_block(64, 2, first_block=True))
-        resnet.add(self.resid_block(128, 2))
-        resnet.add(self.resid_block(256, 2))
-        resnet.add(self.resid_block(512, 2))
-
-        resnet.add(tf.keras.layers.GlobalAveragePooling2D())
-        resnet.add(tf.keras.layers.Dense(10))
-
-        resnet.build([None, 128, 128, 1])
-
-        return resnet
-
-    def resid_block(self, num_channels, num_residuals, first_block=False):
-
-        model = tf.keras.models.Sequential()
-        for i in range(num_residuals):
-            if i == 0 and not first_block:
-                model.add(resid(num_channels, pointwise=True, strides=2))
-            else:
-                model.add(resid(num_channels, strides=1))
-        return model
 
     def MobileNet(self):
         """https://arxiv.org/abs/1704.04861
         """
         # not complete mobilenet, only deepwise seperable convolutional.
         model = tf.keras.models.Sequential()
-        model.add(tf.keras.layers.Conv2D(filters=6, kernel_size=5,
-                                         activation='sigmoid',
-                                         input_shape=[28, 28, 1]))
+        model.add(
+            tf.keras.layers.Conv2D(filters=6,
+                                   kernel_size=5,
+                                   activation='sigmoid',
+                                   input_shape=[28, 28, 1]))
         model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
-        model.add(tf.keras.layers.SeparableConv2D(
-            filters=16, kernel_size=5, activation='sigmoid'))
+        model.add(
+            tf.keras.layers.SeparableConv2D(filters=16,
+                                            kernel_size=5,
+                                            activation='sigmoid'))
         model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
         model.add(tf.keras.layers.Flatten())
         model.add(tf.keras.layers.Dense(120, activation='sigmoid'))
@@ -290,23 +293,36 @@ class inception(tf.keras.layers.Layer):
     def __init__(self, c1, c2, c3, c4):
         super().__init__()
 
-        self.p1_1 = tf.keras.layers.Conv2D(
-            c1, kernel_size=1, activation='relu', padding='same')
+        self.p1_1 = tf.keras.layers.Conv2D(c1,
+                                           kernel_size=1,
+                                           activation='relu',
+                                           padding='same')
 
-        self.p2_1 = tf.keras.layers.Conv2D(
-            c2[0], kernel_size=1, padding='same', activation='relu')
-        self.p2_2 = tf.keras.layers.Conv2D(c2[1], kernel_size=3, padding='same',
+        self.p2_1 = tf.keras.layers.Conv2D(c2[0],
+                                           kernel_size=1,
+                                           padding='same',
+                                           activation='relu')
+        self.p2_2 = tf.keras.layers.Conv2D(c2[1],
+                                           kernel_size=3,
+                                           padding='same',
                                            activation='relu')
 
-        self.p3_1 = tf.keras.layers.Conv2D(
-            c3[0], kernel_size=1, padding='same', activation='relu')
-        self.p3_2 = tf.keras.layers.Conv2D(c3[1], kernel_size=5, padding='same',
+        self.p3_1 = tf.keras.layers.Conv2D(c3[0],
+                                           kernel_size=1,
+                                           padding='same',
+                                           activation='relu')
+        self.p3_2 = tf.keras.layers.Conv2D(c3[1],
+                                           kernel_size=5,
+                                           padding='same',
                                            activation='relu')
 
-        self.p4_1 = tf.keras.layers.MaxPool2D(
-            pool_size=3, padding='same', strides=1)
-        self.p4_2 = tf.keras.layers.Conv2D(
-            c4, kernel_size=1, padding='same', activation='relu')
+        self.p4_1 = tf.keras.layers.MaxPool2D(pool_size=3,
+                                              padding='same',
+                                              strides=1)
+        self.p4_2 = tf.keras.layers.Conv2D(c4,
+                                           kernel_size=1,
+                                           padding='same',
+                                           activation='relu')
 
     def call(self, x):
         p1 = self.p1_1(x)
@@ -325,14 +341,16 @@ class resid(tf.keras.Model):
                                             strides=strides)
         self.bn1 = tf.keras.layers.BatchNormalization()
 
-        self.conv2 = tf.keras.layers.Conv2D(
-            num_channels, kernel_size=3, padding='same')
+        self.conv2 = tf.keras.layers.Conv2D(num_channels,
+                                            kernel_size=3,
+                                            padding='same')
 
         self.bn2 = tf.keras.layers.BatchNormalization()
 
         if pointwise:
-            self.conv3 = tf.keras.layers.Conv2D(
-                num_channels, kernel_size=1, strides=strides)
+            self.conv3 = tf.keras.layers.Conv2D(num_channels,
+                                                kernel_size=1,
+                                                strides=strides)
 
         else:
             self.conv3 = None

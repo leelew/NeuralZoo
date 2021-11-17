@@ -1,5 +1,19 @@
-import tensorflow as tf
+# ==============================================================================
+# Keras spatial domain attention layers
+#
+# (1) CV self attention:
+# (2) non-local attention:
+#
+# author: Lu Li
+# email: lilu83@mail.sysu.edu.cn
+# ==============================================================================
 
+import tensorflow as tf
+from tensorflow.keras import layers
+
+
+class CBAM(layers.Layer):
+    pass
 
 
 class FeatureAttention(tf.keras.layers.Layer):
@@ -25,10 +39,7 @@ class FeatureAttention(tf.keras.layers.Layer):
         - Contains the implementation of Squeeze-and-Excitation(SE) block.
         As described in https://arxiv.org/abs/1709.01507.
     """
-
-    def __init__(self,
-                 dense_ratio=1,
-                 activation='sigmoid'):
+    def __init__(self, dense_ratio=1, activation='sigmoid'):
         super().__init__()
 
         self.dense_ratio = dense_ratio
@@ -37,16 +48,14 @@ class FeatureAttention(tf.keras.layers.Layer):
     def build(self, input_shape):
 
         self.dense_avg_pool_1 = tf.keras.layers.Dense(
-            units=int(input_shape[-1]) //
-            self.dense_ratio,
+            units=int(input_shape[-1]) // self.dense_ratio,
             activation='relu',
             name='MLP_AVG_POOL_1')
-        self.dense_avg_pool_2 = tf.keras.layers.Dense(
-            units=int(input_shape[-1]),
-            name='MLP_AVG_POOL_2')
+        self.dense_avg_pool_2 = tf.keras.layers.Dense(units=int(
+            input_shape[-1]),
+                                                      name='MLP_AVG_POOL_2')
         self.activation = tf.keras.layers.Activation(
-            activation='sigmoid',
-            name='CHANNEL_ATTENTION_SIGMOID')
+            activation='sigmoid', name='CHANNEL_ATTENTION_SIGMOID')
 
         super().build(input_shape)
 
@@ -59,18 +68,20 @@ class FeatureAttention(tf.keras.layers.Layer):
                    2. concat
         """
         # avg pooling
-        avg_pool = tf.compat.v1.reduce_mean(
-            inputs, axis=[-3, -2], keep_dims=True)
+        avg_pool = tf.compat.v1.reduce_mean(inputs,
+                                            axis=[-3, -2],
+                                            keep_dims=True)
         x_avg_pool = self.dense_avg_pool_1(avg_pool)
         x_avg_pool = self.dense_avg_pool_2(x_avg_pool)
         # max pooling
-        max_pool = tf.compat.v1.reduce_max(
-            inputs, axis=[-3, -2], keep_dims=True)
+        max_pool = tf.compat.v1.reduce_max(inputs,
+                                           axis=[-3, -2],
+                                           keep_dims=True)
         x_max_pool = self.dense_avg_pool_1(max_pool)
         x_max_pool = self.dense_avg_pool_2(x_max_pool)
         # concat
         scale = self.activation(x_avg_pool + x_max_pool)
-        return inputs*scale
+        return inputs * scale
 
 
 class SpatialAttention(tf.keras.layers.Layer):
@@ -94,7 +105,6 @@ class SpatialAttention(tf.keras.layers.Layer):
         - Contains the implementation of Convolutional Block Attention Module
         (CBAM) block. As described in https://arxiv.org/abs/1807.06521.
     """
-
     def __init__(self, kernel_size=7):
         super().__init__()
 
@@ -103,15 +113,13 @@ class SpatialAttention(tf.keras.layers.Layer):
     def build(self, input_shape):
 
         self.dims = len(input_shape)
-        self.Conv = tf.keras.layers.Conv2D(
-            filters=1,
-            kernel_size=self.kernel_size,
-            strides=[1, 1],
-            padding='same',
-            name='CONV')
+        self.Conv = tf.keras.layers.Conv2D(filters=1,
+                                           kernel_size=self.kernel_size,
+                                           strides=[1, 1],
+                                           padding='same',
+                                           name='CONV')
         self.activation = tf.keras.layers.Activation(
-            activation='sigmoid',
-            name='SPATIAL_ATTENTION_SIGMOID')
+            activation='sigmoid', name='SPATIAL_ATTENTION_SIGMOID')
 
         super().build(input_shape)
 
@@ -125,10 +133,8 @@ class SpatialAttention(tf.keras.layers.Layer):
                    3. spread dimensions
         """
         # dense channel dims
-        avg_pool = tf.compat.v1.reduce_mean(
-            inputs, axis=[-1], keep_dims=True)
-        max_pool = tf.compat.v1.reduce_max(
-            inputs, axis=[-1], keep_dims=True)
+        avg_pool = tf.compat.v1.reduce_mean(inputs, axis=[-1], keep_dims=True)
+        max_pool = tf.compat.v1.reduce_max(inputs, axis=[-1], keep_dims=True)
         # concat
         concat = tf.concat([avg_pool, max_pool], -1)
 
@@ -150,7 +156,7 @@ class SpatialAttention(tf.keras.layers.Layer):
         else:
             scale = tf.reshape(scale, [-1, H, W, 1])
 
-        return inputs*scale
+        return inputs * scale
 
 
 class SelfAttention(tf.keras.layers.Layer):
@@ -173,7 +179,6 @@ class SelfAttention(tf.keras.layers.Layer):
     References:
         - Attention is all you need.
     """
-
     def __init__(self, dropout_rate=0.1):
         super().__init__()
 
@@ -191,12 +196,12 @@ class SelfAttention(tf.keras.layers.Layer):
         if self.dims == 5:
             self.T = int(input_shape[-4])
 
-        self.q = tf.keras.layers.Conv2D(
-            filters=int(input_shape[-1]), kernel_size=1)
-        self.k = tf.keras.layers.Conv2D(
-            filters=int(input_shape[-1]), kernel_size=1)
-        self.v = tf.keras.layers.Conv2D(
-            filters=int(input_shape[-1]), kernel_size=1)
+        self.q = tf.keras.layers.Conv2D(filters=int(input_shape[-1]),
+                                        kernel_size=1)
+        self.k = tf.keras.layers.Conv2D(filters=int(input_shape[-1]),
+                                        kernel_size=1)
+        self.v = tf.keras.layers.Conv2D(filters=int(input_shape[-1]),
+                                        kernel_size=1)
 
         self.dropout_1 = tf.keras.layers.Dropout(self.dropout_rate)
         self.bn = tf.keras.layers.BatchNormalization()
@@ -215,13 +220,13 @@ class SelfAttention(tf.keras.layers.Layer):
         # get shape
         _, H, W, C = Q.get_shape().as_list()
         # reshape 4D to 3D
-        Q_ = tf.reshape(Q, [-1, H*W, C])
-        K_ = tf.reshape(K, [-1, H*W, C])
-        V_ = tf.reshape(V, [-1, H*W, C])
+        Q_ = tf.reshape(Q, [-1, H * W, C])
+        K_ = tf.reshape(K, [-1, H * W, C])
+        V_ = tf.reshape(V, [-1, H * W, C])
         # multiply
         outputs = tf.matmul(Q_, tf.transpose(K_, [0, 2, 1]))
         # scale
-        outputs = outputs / (C ** 0.5)
+        outputs = outputs / (C**0.5)
         # Activation
         outputs = tf.nn.softmax(outputs)
         # Dropouts

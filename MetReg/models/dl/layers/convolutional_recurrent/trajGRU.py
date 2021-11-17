@@ -112,10 +112,15 @@ def wrap(img, x, y):
 
 
 class BaseConvRNN(keras.layers.Layer):
-    def __init__(self, num_filter, b_h_w,
-                 h2h_kernel=(3, 3), h2h_dilate=(1, 1),
-                 i2h_kernel=(3, 3), i2h_stride=(1, 1),
-                 i2h_pad=(1, 1), i2h_dilate=(1, 1),
+    def __init__(self,
+                 num_filter,
+                 b_h_w,
+                 h2h_kernel=(3, 3),
+                 h2h_dilate=(1, 1),
+                 i2h_kernel=(3, 3),
+                 i2h_stride=(1, 1),
+                 i2h_pad=(1, 1),
+                 i2h_dilate=(1, 1),
                  act_type=tf.math.tanh,
                  prefix='BaseConvRNN'):
         super(BaseConvRNN, self).__init__()
@@ -146,9 +151,16 @@ class BaseConvRNN(keras.layers.Layer):
 
 
 class TrajGRU(BaseConvRNN):
-    def __init__(self, num_filter, b_h_w, zoneout=0.0, L=5,
-                 i2h_kernel=(3, 3), i2h_stride=(1, 1), i2h_pad=(1, 1),
-                 h2h_kernel=(5, 5), h2h_dilate=(1, 1),
+    def __init__(self,
+                 num_filter,
+                 b_h_w,
+                 zoneout=0.0,
+                 L=5,
+                 i2h_kernel=(3, 3),
+                 i2h_stride=(1, 1),
+                 i2h_pad=(1, 1),
+                 h2h_kernel=(5, 5),
+                 h2h_dilate=(1, 1),
                  act_type=tf.nn.leaky_relu):
         """
         Input
@@ -259,8 +271,9 @@ class TrajGRU(BaseConvRNN):
         if inputs is not None:
             S, B, H, W, C = tf.shape(inputs).numpy()
             i2h = self.i2h(tf.reshape(inputs, (-1, H, W, C)))
-            i2h = tf.reshape(i2h, (S, B, tf.shape(i2h).numpy()[1], tf.shape(i2h).numpy()[2],
-                                   tf.shape(i2h).numpy()[3]))
+            i2h = tf.reshape(
+                i2h, (S, B, tf.shape(i2h).numpy()[1], tf.shape(i2h).numpy()[2],
+                      tf.shape(i2h).numpy()[3]))
             i2h_slice = tf.split(i2h, num_or_size_splits=3, axis=4)
 
         else:
@@ -284,12 +297,13 @@ class TrajGRU(BaseConvRNN):
             h2h_slice = tf.split(h2h, 3, axis=3)
 
             if i2h_slice is not None:
-                reset_gate = tf.math.sigmoid(
-                    i2h_slice[0][i, ...] + h2h_slice[0])
-                update_gate = tf.math.sigmoid(
-                    i2h_slice[1][i, ...] + h2h_slice[1])
-                new_mem = self._act_type(
-                    i2h_slice[2][i, ...] + reset_gate * h2h_slice[2], alpha=0.2)
+                reset_gate = tf.math.sigmoid(i2h_slice[0][i, ...] +
+                                             h2h_slice[0])
+                update_gate = tf.math.sigmoid(i2h_slice[1][i, ...] +
+                                              h2h_slice[1])
+                new_mem = self._act_type(i2h_slice[2][i, ...] +
+                                         reset_gate * h2h_slice[2],
+                                         alpha=0.2)
             else:
                 reset_gate = tf.math.sigmoid(h2h_slice[0])
                 update_gate = tf.math.sigmoid(h2h_slice[1])
