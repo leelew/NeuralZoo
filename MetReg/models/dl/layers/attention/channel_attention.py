@@ -12,10 +12,10 @@
 # ==============================================================================
 
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Reshape
 from tensorflow import multiply
-from tensorflow.python.keras.layers.pooling import GlobalMaxPooling2D
+from tensorflow.keras import layers
+from tensorflow.keras.layers import (Dense, GlobalAveragePooling2D,
+                                     GlobalMaxPooling2D, Reshape)
 
 
 class SE(layers.Layer):
@@ -23,7 +23,7 @@ class SE(layers.Layer):
 
     Args:
       units (int): the dimensionality of the output space (i.e., the number 
-        of output units in fc layer)
+        of output units in fc layer). Equal to the number of inputs channels.s
       reduction_ratio (int, optional): A hyperparameter which allows us to 
         vary the capacity and computational cost of the SE blocks in the 
         network. Hu et al., (2019) says setting r = 16 achieves a good 
