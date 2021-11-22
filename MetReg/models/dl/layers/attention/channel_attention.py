@@ -136,5 +136,40 @@ class SE(layers.Layer):
         return config
 
 
+class se_5d(tf.keras.layers.Layer):
+    def __init__(self, input_shape):
+        super().__init__()
+        self.dense1 = Dense(input_shape[-1] // 8)
+        #activation='relu',
+        #kernel_initializer='he_normal',
+        #use_bias=True,
+        #bias_initializer='zeros')
+        self.dense2 = Dense(input_shape[-1])
+        #activation='relu',
+        #kernel_initializer='he_normal',
+        #use_bias=True,
+        #bias_initializer='zeros')
+
+        self.gap = GlobalAveragePooling2D()  #(keepdims=True)
+
+    def call(self, inputs, input_shape):
+        t, lat, lon, c = input_shape
+        print((t, lat, lon, c))
+        a = Reshape((lat, lon, c * t))(inputs)
+        print(a.shape)
+        se = self.gap(a)  # tf version > 2.6.0
+        se = Reshape((1, 1, c * t))(se)
+        print(se.shape)
+        se = self.dense1(se)
+        print(se.shape)
+        se = self.dense2(se)
+        print(se.shape)
+        a = multiply([a, se])
+        print(a.shape)
+        inputs = Reshape((t, lat, lon, c))(a)
+
+        return inputs
+
+
 class SK():
     pass

@@ -1,25 +1,17 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import numpy as np
-
+import tensorflow as tf
 from tensorflow.python.keras import activations
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras import constraints
-from tensorflow.python.keras import initializers
-from tensorflow.python.keras import regularizers
+from tensorflow.python.keras import constraints, initializers, regularizers
 from tensorflow.python.keras.engine.base_layer import Layer
 from tensorflow.python.keras.engine.input_spec import InputSpec
-from tensorflow.python.keras.layers.recurrent import DropoutRNNCellMixin
-from tensorflow.python.keras.layers.recurrent import RNN
-from tensorflow.python.keras.utils import conv_utils
-from tensorflow.python.keras.utils import generic_utils
-from tensorflow.python.keras.utils import tf_utils
+from tensorflow.python.keras.layers.convolutional_recurrent import ConvRNN2D
+from tensorflow.python.keras.layers.recurrent import RNN, DropoutRNNCellMixin
+from tensorflow.python.keras.utils import conv_utils, generic_utils, tf_utils
 from tensorflow.python.ops import array_ops
 from tensorflow.python.util.tf_export import keras_export
-from tensorflow.python.keras.layers.convolutional_recurrent import ConvRNN2D
-import tensorflow as tf
 
 
 class SaConvLSTM2DCell(DropoutRNNCellMixin, Layer):
