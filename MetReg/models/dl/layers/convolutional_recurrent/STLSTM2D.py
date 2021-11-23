@@ -12,10 +12,12 @@
 # ==============================================================================
 
 from traceback import print_tb
+
 import tensorflow as tf
 from tensorflow import sigmoid, split, tanh
 from tensorflow.keras import Input, Model, Sequential, layers
-from tensorflow.keras.layers import BatchNormalization, Concatenate, Conv2D, Dense
+from tensorflow.keras.layers import (BatchNormalization, Concatenate, Conv2D,
+                                     Dense)
 from tensorflow.python.keras.layers.convolutional import Conv
 from tensorflow.python.ops.gen_math_ops import Mod
 
@@ -153,7 +155,8 @@ class predRNN(layers.Layer):
 
         self.built = True
 
-    def call(self, inputs):
+    def call(self, inputs, states=None):
+        # states: [h, c, m]  shape as (112, 112, n)
 
         # init parameters
         h_t, c_t = [], []
@@ -171,6 +174,11 @@ class predRNN(layers.Layer):
         #memory = initializer(shape=(self.h, self.w, self.num_hidden[0]))
         #FIXME: Change to the same manner of h, c
         memory = self.init_list[0](zero)
+
+        if states is not None:
+            h_t[0] = states[0]
+            c_t[0] = states[1]
+            memory = states[2]
 
         out = []
         # forward for each timestep
@@ -199,6 +207,7 @@ if __name__ == '__main__':
 
     import numpy as np
     inputs = Input((7, 112, 112, 8))
-    outputs, states = predRNN(3, [64, 128, 64], kernel_size=5)(inputs)
+    outputs, states = predRNN(3, [64, 64, 64], kernel_size=5)(inputs)
+    outputs, states = predRNN(3, [64, 64, 64], kernel_size=5)(inputs, states)
     mdl = Model(inputs, outputs)
     mdl.summary()
