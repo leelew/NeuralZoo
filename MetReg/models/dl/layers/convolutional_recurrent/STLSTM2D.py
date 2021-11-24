@@ -23,7 +23,7 @@ from tensorflow.python.ops.gen_math_ops import Mod
 
 
 class STLSTM2DCell(layers.Layer):
-    """Spatial-temporal LSTM
+    """Spatial-temporal LSTM cell
 
     Args:
       units ([type]): [description]
