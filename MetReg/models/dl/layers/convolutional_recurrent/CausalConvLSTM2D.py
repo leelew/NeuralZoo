@@ -290,7 +290,7 @@ class CausalConvLSTMCell(layers.Layer):
         return state
 
 
-class CausalConvLSTM2D(layers.Layer):
+class CausalConvLSTM2D(layers.Layer): #TODO:Add iterative/teacher forcing/schedule sample forecast methods
     """Causality-structured ConvLSTM layer.
 
     Args:

@@ -9,6 +9,40 @@ from tensorflow.keras.layers import Conv2D, Dense
 from tensorflow.keras.models import Sequential
 
 
+def VGG():
+    """
+    VGG created by Visual Geometry Group,
+    raised a method to create Deep model by repeat add vgg block
+    could read from https://arxiv.org/abs/1409.1556
+    """
+
+    conv_map = ((1, 64), (1, 128), (2, 256), (2, 512), (2, 512))
+
+    vgg = tf.keras.models.Sequential()
+    for i, j in conv_map:
+        vgg.add(self.vgg_block(i, j))
+    vgg.add(tf.keras.layers.Flatten())
+    vgg.add(tf.keras.layers.Dense(4096, activation='relu'))
+    vgg.add(tf.keras.layers.Dropout(0.5))
+    vgg.add(tf.keras.layers.Dense(4096, activation='relu'))
+    vgg.add(tf.keras.layers.Dropout(0.5))
+    vgg.add(tf.keras.layers.Dense(10, activation='sigmoid'))
+
+    vgg.build((None, 128, 128, 1))
+
+    return vgg
+
+    def vgg_block(self, num_convs, num_channels):
+        model = tf.keras.models.Sequential()
+        for _ in range(num_convs):
+            model.add(
+                tf.keras.layers.Conv2D(num_channels,
+                                       kernel_size=3,
+                                       padding='same',
+                                       activation='relu'))
+        model.add(tf.keras.layers.MaxPool2D(pool_size=2, strides=2))
+        return model
+
 class BaseCNNRegressor(Model):
     def __init__(self):
         super().__init__()
