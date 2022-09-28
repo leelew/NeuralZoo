@@ -17,15 +17,15 @@ with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
 
 # set up
 setup(
-    name='MetReg',
+    name='NeuralZoo',
     version='1.0.0',
-    description='MetReg is a Python library for forecasting meteorological'
+    description='NeuralZoo is a Python library for forecasting meteorological'
                 'variables that supports all popular machine learning models.',
     license='MIT',
     long_description=long_description,
-    url='https://github.com/leelew/MetReg',
+    url='https://github.com/leelew/NeuralZoo',
     author='Lu Li',
-    author_email='lilu35@mail2.sysu.edu.cn',
+    author_email='lilu83@mail.sysu.edu.cn',
     classifiers=[
         'Development Status :: 3 - Alpha',  # 4 - Beta; 5 - Production/Stable
         'Intended Audience :: Developers',  # registered users
@@ -34,8 +34,8 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='machine learning models, deep learning models',
-    package_dir={'': 'MetReg'},
-    packages=find_packages(where='MetReg'),
+    package_dir={'': 'NeuralZoo'},
+    packages=find_packages(where='NeuralZoo'),
     python_requires='>=3.6, <4',
     install_requires=install_requires,
     include_package_data=False,
