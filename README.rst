@@ -1,8 +1,9 @@
 
 NeuralZoo | A library for forecasting meteorological variables 
 ==============================================================
+NOTE: This repo can NOT be used, please wait!  
 
-`Lu Li <https://www.researchgate.net/profile/Lu_Li122>`_,
+`Lu Li <https://www.researchgate.net/profile/Lu_Li122>`_
 
  Read the `docs <https://github.com/leelew/NeuralZoo/blob/main/docs/pipeline.pdf>`_ | Try it by yourself!
 
