@@ -9,7 +9,7 @@ NOTE: This repo can NOT be used, please wait!
 
 Installation
 -------------
-MetReg support Python 3.6+. To install, you can use pip or conda. 
+MetReg support Python 3.8+. To install, you can use pip or conda. 
 
 **Latest Release**
 
