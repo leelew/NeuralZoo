@@ -17,7 +17,7 @@ Install the latest release using pip.
 
 .. code:: shell
    
-   pip install NeuralZoo
+   pip3 install NeuralZoo
 
 **Development Version**
 
